@@ -1,0 +1,7 @@
+#!/bin/sh
+export WP_CLI_PACKAGES_DIR=/usr/local/share/wp-cli
+if [ "$(id -u -n)" = "www-data" ] ; then
+    exec /usr/local/bin/_wp "$@"
+else
+    exec gosu www-data:www-data /usr/local/bin/_wp "$@"
+fi

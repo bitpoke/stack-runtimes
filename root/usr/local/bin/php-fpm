@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e -o pipefail
+
+test -d /run/php || mkdir -p /run/php
+# rm /var/log/stderr
+# touch /var/log/stderr
+
+dockerize -template "/etc/conf-templates/php-fpm.conf:/etc/php/$PHP_SERIES/fpm/php-fpm.conf"
+
+dockerize -template "/etc/conf-templates/php-fpm.ini:/etc/php/$PHP_SERIES/fpm/conf.d/50-instance.ini"
+dockerize -template "/etc/conf-templates/php-cli.ini:/etc/php/$PHP_SERIES/cli/conf.d/50-instance.ini"
+
+echo "Starting PHP-FPM ..." >&2
+# exec 3> /var/log/stderr
+ls -l /var/log/stderr
+echo "Starting PHP-FPM2 ..." >&2
+
+if [[ $# -eq 0 ]] ; then
+    exec dockerize -stderr /var/log/stderr -poll "/usr/sbin/php-fpm$PHP_SERIES" -y "/etc/php/$PHP_SERIES/fpm/php-fpm.conf"
+else
+    exec dockerize -stderr /var/log/stderr -poll "/usr/sbin/php-fpm$PHP_SERIES" "$@"
+fi

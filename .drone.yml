@@ -1,0 +1,22 @@
+pipeline:
+  publish-docker-image:
+    group: publish
+    image: plugins/docker
+    registry: quay.io
+    repo: quay.io/presslabs/php-runtime
+    username: presslabs+drone
+    dockerfile: php-${PHP_SERIES}/Dockerfile
+    context: php-${PHP_SERIES}
+    tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}", "${PHP_VERSION}-b${DRONE_BUILD_NUMBER}"]
+    build_args:
+      - PHP_VERSION=${PHP_VERSION}
+    secrets:
+      - source: QUAY_TOKEN
+        target: DOCKER_PASSWORD
+    when:
+      event: push
+      branch: master
+matrix:
+  include:
+    - PHP_SERIES: "7.1"
+      PHP_VERSION: "7.1.20"

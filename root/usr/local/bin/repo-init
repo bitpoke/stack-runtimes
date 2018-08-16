@@ -1,0 +1,49 @@
+#!/bin/bash
+set -e -o pipefail
+
+export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+
+_git() {
+    gosu www-data:www-data /usr/bin/git "$@"
+}
+
+if [ -z "${GIT_REPO}" ] ; then
+    echo "GIT_REPO environment variable is not defined. Skipping clone..." >&2
+    exit 0
+fi
+
+: "${GIT_REF:=master}"
+
+cd /code
+
+if [ ! -d "/code/.git" ] ; then
+    if [ -z "$(ls -A "/code")" ] ; then
+        chown www-data:www-data /code
+        _git init
+    else
+        echo "/code is neither empty nor a git repository." >&2
+        exit 1
+    fi
+fi
+
+if [ ! -z "$(_git status --porcelain)" ] ; then
+    echo "/code repo is dirty. Skipping update..." >&2
+    exit 0
+fi
+
+if ! _git remote get-url origin >/dev/null 2>&1 ; then
+    _git remote add origin "${GIT_REPO}"
+fi
+
+origin="$(_git remote get-url origin || true)"
+
+if [ "$origin" != "${GIT_REPO}" ] ; then
+    _git remote set-url origin "${GIT_REPO}"
+fi
+
+if [ "$(_git cat-file -t "${GIT_REF}" 2>/dev/null)" != "commit" ] ; then
+    echo "Fetching updates..." >&2
+    _git fetch --tags
+fi
+
+_git checkout ${GIT_REF}
