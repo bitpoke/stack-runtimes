@@ -1,0 +1,17 @@
+version: '3'
+services:
+  php:
+    image: quay.io/presslabs/php-runtime:7.1.20-canary
+    volumes:
+      - ./docker-compose/html:/var/www/html:ro
+    restart: on-failure
+    network_mode: "service:nginx"
+  nginx:
+    image: docker.io/library/nginx:1.14.0-alpine
+    command: [nginx-debug, '-g', 'daemon off;']
+    volumes:
+      - ./docker-compose/html:/var/www/html:ro
+      - ./docker-compose/nginx/conf.d:/etc/nginx/conf.d:ro
+    ports:
+      - "8080:80"
+    restart: on-failure
