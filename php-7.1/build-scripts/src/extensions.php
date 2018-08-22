@@ -30,6 +30,7 @@ $BUILTIN_EXTENSIONS = array(
 	new BuiltinExtension('mcrypt', array('libmcrypt-dev')),
 	new BuiltinExtension('mysqli'),
 	new BuiltinExtension('opcache'),
+	new BuiltinExtension('pcntl'),
 	new BuiltinExtension('shmop'),
 	new BuiltinExtension('soap'),
 	new BuiltinExtension('tidy', array('libtidy-dev')),
