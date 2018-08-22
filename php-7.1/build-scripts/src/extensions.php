@@ -51,6 +51,7 @@ $PECL_EXTENSIONS = array(
 	// install "regular" extensions
 	new PeclExtension('grpc', array(), array(), '1.14.1'),
 	new PeclExtension('imagick', array('libmagickwand-dev'), array(), '3.4.3', 'imagick', 'imagick', array('ghostscript')),
+	new PeclExtension('libsodium', array('libsodium-dev'), array(), '2.0.11', 'sodium', 'docker-php-ext-sodium.ini'),
 	new PeclExtension('mailparse', array(), array(), '3.0.2'),
 	new PeclExtension('memcached', array('libmemcached-dev', 'zlib1g-dev'), array('--enable-memcached-igbinary', '--enable-memcached-msgpack', '--enable-memcached-json'), '3.0.4'),
 	new PeclExtension('oauth', array('libpcre3-dev'), array(), '2.0.2'),
