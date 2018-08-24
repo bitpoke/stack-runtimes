@@ -15,24 +15,6 @@
 set -e
 set -o pipefail
 
-if [[ $SMTP_HOST ]] && [[ $SMTP_USER ]] && [[ $SMTP_PASS ]]; then
-    # set reasonable defaults
-    SMTP_TLS=${SMTP_TLS:-YES}
-    SMTP_HOST=${SMTP_HOST:-localhost}
-    SMTP_PORT=${SMTP_PORT:-587}
-
-cat << EOF > /etc/ssmtp/ssmtp.conf
-mailhub=$SMTP_HOST:$SMTP_PORT
-AuthUser=$SMTP_USER
-AuthPass=$SMTP_PASS
-UseSTARTTLS=$SMTP_TLS
-FromLineOverride=YES
-EOF
-fi
-
-# first arg is `-f` or `--some-option`
-if [ "${1#-}" != "$1" ]; then
-    set -- php-fpm "$@"
-fi
-
-exec "$@"
+dockerize -stdout /var/log/stdout -stderr /var/log/stderr \
+    -template /usr/local/docker/templates:/usr/local/docker/etc -no-overwrite \
+    -- "$@"
