@@ -19,4 +19,4 @@ pipeline:
 matrix:
   include:
     - PHP_SERIES: "7.1"
-      PHP_VERSION: "7.1.20"
+      PHP_VERSION: "7.1.21"
