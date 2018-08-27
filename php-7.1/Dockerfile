@@ -37,6 +37,6 @@ RUN set -ex \
 
 COPY docker /usr/local/docker
 
-EXPOSE 9000
+EXPOSE 80
 ENTRYPOINT ["/usr/local/docker/bin/docker-php-entrypoint"]
 CMD ["supervisord", "-c", "/usr/local/docker/etc/supervisor.conf"]
