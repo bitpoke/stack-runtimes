@@ -28,8 +28,6 @@ RUN set -ex \
     && curl -L https://github.com/ochinchina/supervisord/releases/download/v${SUPERVISORD_VERSION}/supervisord_${SUPERVISORD_VERSION}_linux_amd64 -o /usr/local/bin/supervisord \
     && chmod +x /usr/local/bin/supervisord \
     # prepare rootfs
-    && mkfifo /var/log/stdout && chown www-data:www-data /var/log/stdout \
-    && mkfifo /var/log/stderr && chown www-data:www-data /var/log/stderr \
     && ln -sf /usr/local/docker/etc/php.ini /usr/local/etc/php/conf.d/zz-01-custom.ini \
     # our dummy index
     && { \
