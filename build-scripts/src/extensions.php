@@ -27,7 +27,6 @@ $BUILTIN_EXTENSIONS = array(
 	),
 	new BuiltinExtension('intl', array('libicu-dev', 'zlib1g-dev')),
 	new BuiltinExtension('gettext'),
-	new BuiltinExtension('mcrypt', array('libmcrypt-dev')),
 	new BuiltinExtension('mysqli'),
 	new BuiltinExtension('opcache'),
 	new BuiltinExtension('pcntl'),
@@ -60,6 +59,12 @@ $PECL_EXTENSIONS = array(
 	new PeclExtension('redis', array(), array('--enable-redis-igbinary', '--enable-redis-lzf'), '4.1.1'),
 	new PeclExtension('yaml', array('libyaml-dev'), array(), '2.0.2'),
 );
+
+if ( version_compare( phpversion(), "7.2", ">=" ) ) {
+	$PECL_EXTENSIONS[] = new PeclExtension('mcrypt', array('libmcrypt-dev'), array(), '1.0.1');
+} else {
+	$BUILTIN_EXTENSIONS[] = new BuiltinExtension('mcrypt', array('libmcrypt-dev'));
+}
 
 function _install_build_deps( $dryRun ) {
 	global $BUILTIN_EXTENSIONS, $PECL_EXTENSIONS;

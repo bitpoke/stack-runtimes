@@ -15,7 +15,9 @@
 set -e
 set -o pipefail
 
+rm -f /var/log/stdout
 mkfifo /var/log/stdout && chown "${WORKER_USER:-www-data}:${WORKER_GROUP:-www-data}" /var/log/stdout
+rm -f /var/log/stderr
 mkfifo /var/log/stderr && chown "${WORKER_USER:-www-data}:${WORKER_GROUP:-www-data}" /var/log/stderr
 
 dockerize -template /usr/local/docker/templates:/usr/local/docker/etc -no-overwrite

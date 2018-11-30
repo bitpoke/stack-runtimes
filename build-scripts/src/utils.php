@@ -4,7 +4,7 @@ function log_msg( $msg, $dest = STDERR ) {
 }
 
 function run( $args, $dryRun = false, $passthru = true, &$lines = array() ) {
-	$cmd = join(' ', array_map(escapeshellarg, $args));
+	$cmd = join(' ', array_map('escapeshellarg', $args));
 	log_msg("+ $cmd");
 	if ( !$dryRun ) {
 		$last_line = "";

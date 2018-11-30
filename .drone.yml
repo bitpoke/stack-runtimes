@@ -5,8 +5,6 @@ pipeline:
     registry: quay.io
     repo: quay.io/presslabs/php-runtime
     username: presslabs+drone
-    dockerfile: php-${PHP_SERIES}/Dockerfile
-    context: php-${PHP_SERIES}
     tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
     build_args:
       - PHP_VERSION=${PHP_VERSION}
@@ -18,5 +16,7 @@ pipeline:
       branch: master
 matrix:
   include:
+    - PHP_SERIES: "7.2"
+      PHP_VERSION: "7.2.12"
     - PHP_SERIES: "7.1"
-      PHP_VERSION: "7.1.21"
+      PHP_VERSION: "7.1.24"
