@@ -21,7 +21,7 @@ RUN set -ex \
 
 RUN set -ex \
     && apt-get update \
-    && apt-get install --no-install-recommends -y ssmtp=2.64* nginx-light=1.10* \
+    && apt-get install --no-install-recommends -y ssmtp=2.64* nginx-extras=1.10* lua-cjson=2.1* \
     && sh /usr/local/build-scripts/install-composer.sh \
     && php /usr/local/build-scripts/install-extensions.php \
     && rm -rf /var/lib/apt/lists/* \
