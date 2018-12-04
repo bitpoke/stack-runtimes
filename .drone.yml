@@ -18,5 +18,3 @@ matrix:
   include:
     - PHP_SERIES: "7.2"
       PHP_VERSION: "7.2.12"
-    - PHP_SERIES: "7.1"
-      PHP_VERSION: "7.1.24"
