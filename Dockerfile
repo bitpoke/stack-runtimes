@@ -21,7 +21,14 @@ RUN set -ex \
 
 RUN set -ex \
     && apt-get update \
-    && apt-get install --no-install-recommends -y ssmtp=2.64* nginx-extras=1.10* lua-cjson=2.1* \
+    && apt-get install --no-install-recommends -y gnupg2=2.1* \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN set -ex \
+    && curl -s https://openresty.org/package/pubkey.gpg | apt-key add - \
+    && echo "deb http://openresty.org/package/debian stretch openresty" > /etc/apt/sources.list.d/openresty.list \
+    && apt-get update \
+    && apt-get install --no-install-recommends -y ssmtp=2.64* openresty=1.13* \
     && sh /usr/local/build-scripts/install-composer.sh \
     && php /usr/local/build-scripts/install-extensions.php \
     && rm -rf /var/lib/apt/lists/* \
