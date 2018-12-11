@@ -1,0 +1,9 @@
+# serializers/deserializers
+- name: igbinary
+- name: msgpack
+
+# extensions
+- name: gd
+- name: mcrypt
+- name: memcached
+- name: mysqli
