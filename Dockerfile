@@ -36,12 +36,6 @@ RUN set -ex \
     && docker-php-ext-enable yaml \
     && chown -R www-data:www-data /var/www/html
 
-RUN set -ex \
-    && curl -sL -o /usr/local/bin/wp https://github.com/wp-cli/wp-cli/releases/download/v${WP_CLI_VERSION}/wp-cli-${WP_CLI_VERSION}.phar \
-    && chmod 0644 /usr/local/bin/wp \
-    && ln -sf /var/run/secrets/presslabs.org/instance/php.ini /usr/local/etc/php/conf.d/zz-90-instance.ini \
-    && chown -R www-data:www-data /var/www/html
-
 COPY build-scripts /usr/local/build-scripts
 
 RUN set -ex \
@@ -57,6 +51,8 @@ RUN set -ex \
 RUN set -ex \
     # symlink generated php.ini
     && ln -sf /usr/local/docker/etc/php.ini /usr/local/etc/php/conf.d/zz-01-custom.ini \
+    # symlink php.ini from /var/run/secrets/presslabs.org/instance
+    && ln -sf /var/run/secrets/presslabs.org/instance/php.ini /usr/local/etc/php/conf.d/zz-90-instance.ini \
     # our dummy index
     && { \
        echo "<?php phpinfo(); "; \

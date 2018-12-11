@@ -5,6 +5,7 @@ pipeline:
     repo: quay.io/presslabs/php-runtime
     username: presslabs+drone
     tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}-slim", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}-slim"]
+    cache_from: ["quay.io/presslabs/php-runtime:${PHP_SERIES}-${DRONE_BRANCH/master/latest}-slim"]
     target: slim
     build_args:
       - PHP_VERSION=${PHP_VERSION}
