@@ -6,7 +6,6 @@ pipeline:
     username: presslabs+drone
     tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}-slim", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}-slim"]
     target: slim
-    daemon.storage-path: "/drone/.docker-storage"
     build_args:
       - PHP_VERSION=${PHP_VERSION}
     secrets:
@@ -22,7 +21,7 @@ pipeline:
     repo: quay.io/presslabs/php-runtime
     username: presslabs+drone
     tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
-    daemon.storage-path: "/drone/.docker-storage"
+    cache_from: ["quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}-slim"]
     build_args:
       - PHP_VERSION=${PHP_VERSION}
     secrets:
