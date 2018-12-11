@@ -21,7 +21,7 @@ RUN set -ex \
     && echo "deb http://openresty.org/package/debian stretch openresty" > /etc/apt/sources.list.d/openresty.list \
     && apt-get update \
     && apt-get install --no-install-recommends -y \
-        ssmtp=2.64* openresty=1.13* libyaml-dev=0.1* \
+        ssmtp=2.64* unzip=6.0* openresty=1.13* libyaml-dev=0.1* \
         less=481* git=1:2.11* openssh-client=1:7.4* \
     && rm -rf /var/lib/apt/lists/* \
     # install dockerize
