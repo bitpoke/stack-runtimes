@@ -32,12 +32,16 @@ class BuiltinExtension implements Extension {
 	}
 
 	public function install( $dryRun = false ) {
+		if (extension_loaded($this->name)) {
+			log_msg("+ Skipping {$this->name} as it's already installed");
+			return;
+		}
 		if ( count( $this->configArgs ) > 0 ) {
 			$cmd = array('docker-php-ext-configure', $this->name);
-			run(array_merge($cmd, $this->configArgs), $dryRun);	
+			run(array_merge($cmd, $this->configArgs), $dryRun);
 		}
 		$cmd = array('docker-php-ext-install', $this->name);
-		run($cmd, $dryRun);	
+		run($cmd, $dryRun);
 	}
 }
 
@@ -77,6 +81,10 @@ class PeclExtension implements Extension {
 	}
 
 	public function install( $dryRun = false ) {
+		if (extension_loaded($this->name)) {
+			log_msg("+ Skipping {$this->name} as it's already installed");
+			return;
+		}
 		$cwd = getcwd();
 		run(array('pecl', 'install', '--onlyreqdeps', '--nobuild', "{$this->name}-{$this->version}"), $dryRun);
 

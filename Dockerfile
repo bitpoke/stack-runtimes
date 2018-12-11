@@ -1,5 +1,5 @@
 ARG PHP_VERSION
-FROM php:${PHP_VERSION}-fpm-stretch as minimal
+FROM php:${PHP_VERSION}-fpm-stretch as slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV PHP_VERSION=${PHP_VERSION}
@@ -68,22 +68,11 @@ EXPOSE 80
 ENTRYPOINT ["/usr/local/docker/bin/docker-php-entrypoint"]
 CMD ["supervisord", "-c", "/usr/local/docker/etc/supervisor.conf"]
 
-# FROM minimal
+FROM slim as full
 
-# RUN set -ex \
-
-
-
-# RUN set -ex \
-#     # prepare rootfs
-#     && ln -sf /usr/local/docker/etc/php.ini /usr/local/etc/php/conf.d/zz-01-custom.ini \
-#     # our dummy index
-#     && { \
-#        echo "<?php phpinfo(); "; \
-#     } | tee /var/www/html/index.php >&2 \
-#     && chown -R www-data:www-data /var/www/html
-
-
-# EXPOSE 80
-# ENTRYPOINT ["/usr/local/docker/bin/docker-php-entrypoint"]
-# CMD ["supervisord", "-c", "/usr/local/docker/etc/supervisor.conf"]
+RUN set -ex \
+    # install php extensions
+    && apt-get update \
+    && php /usr/local/build-scripts/install-extensions.php \
+    && rm -rf /var/lib/apt/lists/* \
+    && sh /usr/local/build-scripts/cleanup.sh

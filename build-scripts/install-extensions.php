@@ -41,7 +41,7 @@ $BUILTIN_EXTENSIONS = array(
 
 $PECL_EXTENSIONS = array(
     // install apcu before serializers so that they detect and enable support for it
-    new PeclExtension('apcu', array(), array(), '5.1.14'),
+    new PeclExtension('apcu', array(), array(), '5.1.15'),
     new PeclExtension('apcu_bc', array(), array(), '1.0.4', 'apc'),
 
     // install serializers to make them available for the rest of the extensions
@@ -49,7 +49,7 @@ $PECL_EXTENSIONS = array(
     new PeclExtension('msgpack', array(), array(), '2.0.2'),
 
     // install "regular" extensions
-    new PeclExtension('grpc', array(), array(), '1.16.0'),
+    new PeclExtension('grpc', array(), array(), '1.17.0'),
     new PeclExtension('imagick', array('libmagickwand-dev'), array(), '3.4.3', 'imagick', 'docker-php-ext-imagick.ini', array('ghostscript')),
     new PeclExtension('libsodium', array('libsodium-dev'), array(), '2.0.13', 'sodium', 'docker-php-ext-sodium.ini'),
     new PeclExtension('mailparse', array(), array(), '3.0.2'),
@@ -82,11 +82,6 @@ function find_extension( $name ) {
     return false;
 }
 
-if ( count($argv) < 2 ) {
-    fwrite(STDERR, "USAGE: ${argv[0]} [-n] php-extensions.yaml\n");
-    exit(1);
-}
-
 $dryRun = false;
 if ( count($argv) > 1 && $argv[1] == '-n') {
     $dryRun = true;
@@ -96,8 +91,8 @@ $ext_manifest_file = end($argv);
 
 $extensions = array();
 
-if ( !empty($ext_manifest_file) ) {
-    if ( $ext_manifest_file != '-n' && !file_exists($ext_manifest_file) ) {
+if ( count($argv) > 1 && !empty($ext_manifest_file) && $ext_manifest_file[0] != '-' ) {
+    if ( !file_exists($ext_manifest_file) ) {
         fwrite(STDERR, "Extension manifest file '$ext_manifest_file' does not exists\n");
         exit(1);
     }
@@ -113,7 +108,7 @@ if ( !empty($ext_manifest_file) ) {
         }
     }
 } else {
-    $extensions = $BUILTIN_EXTENSIONS + $PECL_EXTENSIONS;
+    $extensions = array_merge($BUILTIN_EXTENSIONS, $PECL_EXTENSIONS);
 }
 
 install_extensions($extensions, $dryRun);
