@@ -6,8 +6,6 @@ ENV PHP_VERSION=${PHP_VERSION}
 ENV COMPOSER_VERSION=1.7.2
 ENV SUPERVISORD_VERSION=0.5
 ENV DOCKERIZE_VERSION=1.2.0
-ENV WP_CLI_VERSION=2.0.1
-ENV WP_CLI_CONFIG_PATH=/usr/local/docker/etc/wp-cli.yaml
 
 # compile su-exec
 COPY docker/src/su-exec.c /usr/src/
