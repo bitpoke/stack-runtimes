@@ -4,7 +4,7 @@ pipeline:
     registry: quay.io
     repo: quay.io/presslabs/php-runtime
     username: presslabs+drone
-    tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}-slim", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}-slim"]
+    tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}-slim", "${PHP_VERSION}-slim", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}-slim"]
     cache_from: ["quay.io/presslabs/php-runtime:${PHP_SERIES}-${DRONE_BRANCH/master/latest}-slim"]
     target: slim
     build_args:
@@ -21,7 +21,7 @@ pipeline:
     registry: quay.io
     repo: quay.io/presslabs/php-runtime
     username: presslabs+drone
-    tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
+    tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}", "${PHP_VERSION}", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
     cache_from: ["quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}-slim"]
     build_args:
       - PHP_VERSION=${PHP_VERSION}
