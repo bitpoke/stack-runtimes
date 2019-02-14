@@ -35,4 +35,4 @@ pipeline:
 matrix:
   include:
     - PHP_SERIES: "7.2"
-      PHP_VERSION: "7.2.13"
+      PHP_VERSION: "7.2.15"
