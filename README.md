@@ -46,3 +46,8 @@ PHP docker images with batteries included for running WordPress
 * `SMTP_TLS` (default to `yes`)
 * `WORKER_GROUP` (default to `www-data`)
 * `WORKER_USER` (default to `www-data`)
+* `UPLOADS_HTTP_PROXY` (default to `127.0.0.1`) - used to serve Wordpress uploads
+from another upstream.
+* `UPLOADS` (default to `/wp-content/uploads`) - path to media uploads. It needs
+to be the same as in your Wordpress configuration in order to proxy the requests 
+to `UPLOADS_HTTP_PROXY`.
