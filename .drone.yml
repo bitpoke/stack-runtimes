@@ -1,4 +1,13 @@
 pipeline:
+  tests:
+    image: jpetazzo/dind
+    commands:
+      - docker build --rm --build-arg PHP_VERSION=7.2 -t presslabs/php-runtime .
+      - docker run --rm -e UPLOADS=/test -e UPLOADS_HTTP_PROXY=google.com presslabs/php-runtime /usr/bin/openresty -t -c /usr/local/docker/etc/nginx.conf
+      - docker rmi presslabs/php-runtime
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
   publish-slim-docker-image:
     image: plugins/docker
     registry: quay.io
