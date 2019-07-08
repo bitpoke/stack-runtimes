@@ -1,0 +1,116 @@
+FROM docker.io/library/php:7.3-fpm
+
+
+# RUN apt-get update \
+#     && apt-get install --no-install-recommends -y cmake=3.7* nasm=2.12* \
+#     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y cmake nasm automake libtool \
+    && apt-get install --no-install-recommends -y libglib2.0-dev zlib1g-dev libffi-dev liblzma-dev liblz4-dev libexif-dev liblcms2-dev libxml2-dev libgif-dev libpng-dev liborc-0.4-dev libexpat1-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV MOZJPEG_VERSION=3.3.1
+RUN set -ex \
+    && curl -sL -o /tmp/mozjpeg.tar.gz https://github.com/mozilla/mozjpeg/archive/v${MOZJPEG_VERSION}.tar.gz \
+    && mkdir -p /usr/src/mozjpeg \
+    && tar -zxf /tmp/mozjpeg.tar.gz -C /usr/src/mozjpeg --strip-components=1 \
+    && cd /usr/src/mozjpeg \
+    && autoreconf -fiv \
+    && ./configure --prefix=/usr/local --enable-shared --disable-static --disable-dependency-tracking --with-jpeg8 \
+    && make \
+    && make install-strip \
+    && rm -rf /tmp/mozjpeg.tar.gz /usr/src/mozjpeg /usr/local/share/man /usr/local/share/doc
+
+ENV ZSTD_VERSION=1.3.8
+RUN set -ex \
+    && curl -sL -o /tmp/zstd.tar.gz https://github.com/facebook/zstd/releases/download/v${ZSTD_VERSION}/zstd-${ZSTD_VERSION}.tar.gz \
+    && mkdir -p /usr/src/zstd \
+    && tar -zxf /tmp/zstd.tar.gz -C /usr/src/zstd --strip-components=1 \
+    && cd /usr/src/zstd \
+    && make install PREFIX=/usr/local \
+    && rm -rf /tmp/zstd.tar.gz /usr/src/zstd /usr/local/lib/libzstd.a /usr/local/share/man /usr/local/share/doc
+
+ENV LIBTIFF_VERSION=4.0.10
+RUN set -ex \
+    && curl -sL -o /tmp/libtiff.tar.gz https://gitlab.com/libtiff/libtiff/-/archive/v${LIBTIFF_VERSION}/libtiff-v${LIBTIFF_VERSION}.tar.gz \
+    && mkdir -p /usr/src/libtiff \
+    && tar -zxf /tmp/libtiff.tar.gz -C /usr/src/libtiff --strip-components=1 \
+    && cd /usr/src/libtiff \
+    && autoreconf -fiv \
+    && ./configure --help \
+    && ./configure --prefix=/usr/local --enable-shared --disable-static --disable-dependency-tracking --disable-mdi --disable-pixarlog --disable-cxx \
+    && make \
+    && make install-strip \
+    && rm -rf /tmp/libtiff.tar.gz /usr/src/libtiff /usr/local/share/man /usr/local/share/doc
+
+ENV LIBWEBP_VERSION=1.0.1
+RUN set -ex \
+    && curl -sL -o /tmp/libwebp.tar.gz https://github.com/webmproject/libwebp/archive/v${LIBWEBP_VERSION}.tar.gz \
+    && mkdir -p /usr/src/libwebp \
+    && tar -zxf /tmp/libwebp.tar.gz -C /usr/src/libwebp --strip-components=1 \
+    && cd /usr/src/libwebp \
+    && autoreconf -fiv \
+    && ./configure --help \
+    && ./configure --prefix=/usr/local --enable-shared --disable-static --disable-dependency-tracking --disable-neon --enable-libwebpmux \
+    && make \
+    && make install-strip \
+    && rm -rf /tmp/libwebp.tar.gz /usr/src/libwebp /usr/local/share/man /usr/local/share/doc
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y libcairo2-dev libcurl4-openssl-dev libopenjp2-7-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV POPPLER_VERSION=0.72.0
+RUN set -ex \
+    && curl -sL -o /tmp/poppler.tar.xz https://poppler.freedesktop.org/poppler-${POPPLER_VERSION}.tar.xz \
+    && mkdir -p /usr/src/poppler \
+    && tar -Jxf /tmp/poppler.tar.xz -C /usr/src/poppler --strip-components=1 \
+    && cd /usr/src/poppler \
+    && mkdir build \
+    && cd build \
+    && cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local \
+        -DCMAKE_BUILD_TYPE=release \
+        -DENABLE_CPP=OFF \
+        -DENABLE_GOBJECT_INTROSPECTION=OFF \
+        -DENABLE_QT5=OFF \
+        -DENABLE_GLIB=ON \
+        -DENABLE_UTILS=OFF \
+    && make \
+    && make install \
+    && rm -rf /tmp/poppler.tar.xz /usr/src/poppler /usr/local/share/man /usr/local/share/doc
+
+ENV LIBVIPS_VERSION=8.7.3
+RUN set -ex \
+    && curl -sL -o /tmp/libvips.tar.gz https://github.com/libvips/libvips/releases/download/v${LIBVIPS_VERSION}/vips-${LIBVIPS_VERSION}.tar.gz \
+    && mkdir -p /usr/src/libvips \
+    && tar -zxf /tmp/libvips.tar.gz -C /usr/src/libvips --strip-components=1 \
+    && cd /usr/src/libvips \
+    && ./configure --help \
+    && ./configure --prefix=/usr/local \
+        --enable-debug=no \
+        --enable-shared \
+        --disable-static \
+        --disable-dependency-tracking \
+        --with-jpeg \
+        --with-libexif \
+        --with-giflib \
+        --with-png \
+        --with-rsvg \
+        --with-tiff \
+        --with-libwebp \
+        --with-libwebpmux \
+        --without-cfitsio \
+        --without-openslide \
+        --without-gsf \
+        --without-OpenEXR \
+        --without-magick \
+        --without-matio \
+        --without-pangoft2 \
+        --without-ppm \
+        --without-analyze \
+        --without-radiance \
+        --without-x \
+        --disable-introspection \
+    && make \
+    && make install \
+    && rm -rf /usr/src/libvips /tmp/libvips.tar.gz
