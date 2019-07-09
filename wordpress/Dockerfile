@@ -11,12 +11,28 @@ USER www-data
 
 ###############################################################################
 
-FROM base as static
+FROM base as bedrock
+
+###############################################################################
+
+FROM bedrock as bedrock-build
+
+WORKDIR /src
+# Install project dependencies as first build step for child images so that we
+# heat up composer cache
+ONBUILD COPY --chown=www-data:www-data composer.json composer.lock /src/
+ONBUILD RUN composer install --no-dev --no-interaction --no-progress --no-ansi --no-scripts
+
+ONBUILD COPY --chown=www-data:www-data . /src
+ONBUILD RUN composer install --no-dev --no-interaction --no-progress --no-ansi --no-scripts
+ONBUILD RUN rm -rf /app && cp -a /src /app
+
+###############################################################################
+
+FROM base as classic
 WORKDIR /app/html
 ARG WP_VERSION=latest
 RUN set -ex \
     && wp core download --version=${WP_VERSION}
 ONBUILD COPY --chown=www-data:www-data wp-config.php /app/html/wp-config.php
 ONBUILD COPY --chown=www-data:www-data wp-content /app/html/wp-content
-
-###############################################################################

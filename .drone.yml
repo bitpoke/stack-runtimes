@@ -21,22 +21,26 @@ pipeline:
     image: plugins/docker
     context: wordpress
     dockerfile: wordpress/Dockerfile
+    target: classic
     squash: true
     registry: quay.io
     repo: quay.io/presslabs/wordpress-runtime
     username: presslabs+drone
-    tags: ["${WORDPRESS_VERSION}-php${PHP_VERSION}-${DRONE_BRANCH/master/latest}", "${WORDPRESS_VERSION}-php${PHP_VERSION}", "${WORDPRESS_VERSION}-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
+    tags: ["${WORDPRESS_VERSION}", "${WORDPRESS_VERSION}-php${PHP_SERIES}", "${WORDPRESS_VERSION}-php${PHP_SERIES}-r${DRONE_BUILD_NUMBER}"]
     build_args:
       - BASE_IMAGE=quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
+      - WP_VERSION=${WORDPRESS_VERSION}
     secrets:
       - source: QUAY_TOKEN
         target: DOCKER_PASSWORD
     when:
       event: push
       branch: master
+      matrix:
+        PHP_SERIES: 7.3
 
 matrix:
   include:
     - PHP_SERIES: "7.3"
       PHP_VERSION: "7.3.6"
-      WORDPRESS_VERSION: "5.2.2"
+      WORDPRESS_VERSION: "5.2.1"
