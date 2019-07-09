@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# A shell script for installing wp-cli
+set -eo pipefail
+
+TMP="$(mktemp -d)"
+cleanup() {
+    rm -rf "${TMP}"
+}
+trap cleanup EXIT
+
+RELEASE_URL="https://github.com/wp-cli/wp-cli/releases/download/v${WP_CLI_VERSION}"
+BIN_FILE="wp-cli-${WP_CLI_VERSION}.phar"
+CHECKSUMS_FILE="wp-cli-${WP_CLI_VERSION}.phar.sha512"
+
+set -x
+curl -sL "${RELEASE_URL}/${BIN_FILE}" -o "${TMP}/${BIN_FILE}"
+
+EXPECTED_SIGNATURE=$(curl -sL "${RELEASE_URL}/${CHECKSUMS_FILE}")
+ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA512', '${TMP}/${BIN_FILE}');")
+
+if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]
+then
+    >&2 echo 'ERROR: Invalid wp-cli installer signature'
+    exit 1
+fi
+
+cd "${TMP}"
+chmod +x "${TMP}/${BIN_FILE}"
+mv "${TMP}/${BIN_FILE}" /usr/local/bin/wp

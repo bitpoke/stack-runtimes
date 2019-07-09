@@ -1,0 +1,1 @@
+path: {{ default "/var/www/html" .Env.DOCUMENT_ROOT }}/wp

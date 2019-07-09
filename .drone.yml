@@ -17,6 +17,24 @@ pipeline:
       event: push
       branch: master
 
+  publish-worpress-runtime-base-image:
+    image: plugins/docker
+    context: wordpress
+    dockerfile: wordpress/Dockerfile.base
+    squash: true
+    registry: quay.io
+    repo: quay.io/presslabs/wordpress-runtime
+    username: presslabs+drone
+    tags: ["base-php${PHP_VERSION}-${DRONE_BRANCH/master/latest}", "base-php${PHP_VERSION}", "base-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
+    build_args:
+      - BASE_IMAGE=quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
+    secrets:
+      - source: QUAY_TOKEN
+        target: DOCKER_PASSWORD
+    when:
+      event: push
+      branch: master
+
 matrix:
   include:
     - PHP_SERIES: "7.3"
