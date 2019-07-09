@@ -68,7 +68,8 @@ RUN set -ex \
     && ln -sf /dev/null /var/lib/nginx/logs/error.log \
     && chown -R www-data:www-data /app \
     && chown -R www-data:www-data /run \
-    && chown -R www-data:www-data /var/lib/nginx
+    && chown -R www-data:www-data /var/lib/nginx \
+    && chown -R www-data:www-data /var/www
 
 COPY --chown=www-data:www-data ./docker /usr/local/docker
 COPY --chown=www-data:www-data ./nginx-lua /usr/local/docker/lib/nginx/lua/
@@ -77,16 +78,3 @@ USER www-data:www-data
 EXPOSE 8080
 ENTRYPOINT ["/usr/local/docker/bin/docker-php-entrypoint"]
 CMD ["supervisord", "-c", "/usr/local/docker/etc/supervisor.conf"]
-
-
-# FROM php as wordpress
-# ENV WP_HOME=http://localhost:8080
-# ENV WP_CLI_VERSION=2.1.0
-
-# USER root
-# RUN set -ex \
-#     && rm -rf /var/www/html \
-#     && /usr/local/docker/build-scripts/install-wp-cli
-
-# COPY --from=wordpress-builder --chown=www-data:www-data /var/www /var/www
-# USER www-data:www-data
