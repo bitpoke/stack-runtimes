@@ -1,28 +1,13 @@
 pipeline:
-  publish-slim-docker-image:
+  publish-php-runtime-image:
     image: plugins/docker
-    registry: quay.io
-    repo: quay.io/presslabs/php-runtime
-    username: presslabs+drone
-    tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}-slim", "${PHP_VERSION}-slim", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}-slim"]
-    cache_from: ["quay.io/presslabs/php-runtime:${PHP_SERIES}-${DRONE_BRANCH/master/latest}-slim"]
-    target: slim
-    build_args:
-      - PHP_VERSION=${PHP_VERSION}
-    secrets:
-      - source: QUAY_TOKEN
-        target: DOCKER_PASSWORD
-    when:
-      event: push
-      branch: master
-
-  publish-full-docker-image:
-    image: plugins/docker
+    context: php
+    dockerfile: php/Dockerfile
     registry: quay.io
     repo: quay.io/presslabs/php-runtime
     username: presslabs+drone
     tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}", "${PHP_VERSION}", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
-    cache_from: ["quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}-slim"]
+    cache_from: ["quay.io/presslabs/php-runtime:${PHP_SERIES}-${DRONE_BRANCH/master/latest}"]
     build_args:
       - PHP_VERSION=${PHP_VERSION}
     secrets:
@@ -34,5 +19,5 @@ pipeline:
 
 matrix:
   include:
-    - PHP_SERIES: "7.2"
-      PHP_VERSION: "7.2.15"
+    - PHP_SERIES: "7.3"
+      PHP_VERSION: "7.3.6"

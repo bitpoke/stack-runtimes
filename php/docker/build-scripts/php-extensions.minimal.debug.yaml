@@ -1,0 +1,3 @@
+- name: opencensus
+  type: pecl
+  version: 0.2.2

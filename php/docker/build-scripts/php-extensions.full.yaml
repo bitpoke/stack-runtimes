@@ -1,0 +1,120 @@
+- name: "exif"
+- name: "gd"
+  build:
+    args:
+      - "--with-freetype-dir=/usr/include/"
+      - "--with-jpeg-dir=/usr/include/"
+      - "--with-png-dir=/usr/include/"
+      - "--with-webp-dir=/usr/include/"
+    depends:
+      - libfreetype6-dev
+      - libjpeg62-turbo-dev
+      - libpng-dev
+      - libwebp-dev
+- name: imap
+  build:
+    depends:
+      - "libc-client-dev"
+      - "libkrb5-dev"
+    args:
+      - "--with-kerberos"
+      - "--with-imap-ssl"
+- name: intl
+  build:
+    depends:
+      - "libicu-dev"
+      - "zlib1g-dev"
+- name: gettext
+- name: mysqli
+- name: opcache
+- name: pcntl
+- name: shmop
+- name: tidy
+  build:
+    depends:
+      - "libtidy-dev"
+- name: xmlrpc
+- name: xsl
+  build:
+    depends:
+      - "libxslt-dev"
+- name: zip
+  build:
+    args:
+      - "--with-libzip=/usr/include/"
+    depends:
+      - "libzip-dev"
+      - "zlib1g-dev"
+
+#
+# PECL extensions
+#
+
+# Install mcrypt for backward compatibility
+- name: mcrypt
+  version: 1.0.2
+  type: pecl
+  build:
+    depends:
+      - "libmcrypt-dev"
+
+# install apcu before serializers so that they detect and enable support for it
+- name: apcu
+  type: pecl
+  version: 5.1.17
+  priority: 30
+- name: apc
+  pecl_name: apcu_bc
+  type: pecl
+  version: 1.0.5
+
+# install serializers to make them available for the rest of the extensions
+- name: igbinary
+  type: pecl
+  version: 3.0.1
+- name: msgpack
+  type: pecl
+  version: 2.0.3
+- name: protobuf
+  type: pecl
+  version: 3.7.1
+
+- name: grpc
+  type: pecl
+  version: 1.19.0
+- name: imagick
+  type: pecl
+  version: 3.4.3
+  depends:
+    - ghostscript
+  build:
+    depends:
+      - "libmagickwand-dev"
+- name: mailparse
+  type: pecl
+  version: 3.0.3
+- name: memcached
+  type: pecl
+  version: 3.1.3
+  build:
+    depends:
+      - "libmemcached-dev"
+      - "zlib1g-dev"
+    args:
+      - "--enable-memcached-igbinary"
+      - "--enable-memcached-msgpack"
+      - "--enable-memcached-json"
+- name: oauth
+  type: pecl
+  version: 2.0.3
+  build:
+    depends:
+      - 'libpcre3-dev'
+- name: redis
+  type: pecl
+  version: 4.3.0
+  build:
+    args:
+      - "--enable-redis-igbinary"
+      - "--enable-redis-msgpack"
+      - "--enable-redis-lzf"

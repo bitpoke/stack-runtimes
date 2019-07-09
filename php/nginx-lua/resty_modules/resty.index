@@ -1,0 +1,117 @@
+# BEGIN lua-resty-string
+
+dist lua-resty-string-0.11
+  aliases resty.string
+  modules lua-resty-string-0.11
+
+module lua-resty-string-0.11
+  aliases resty.string
+  section 18 118 name
+  section 118 268 status
+  section 268 449 description
+  section 449 5573 synopsis
+  section 5573 5655 author
+  section 5655 7149 copyright and license
+  section 7149 7251 see also
+
+# END lua-resty-string
+# BEGIN lua-resty-hmac
+
+dist lua-resty-hmac-0.02
+  aliases resty.hmac
+  modules lua-resty-hmac-0.02
+
+module lua-resty-hmac-0.02
+  aliases resty.hmac
+  section 18 88 name
+  section 88 188 status
+  section 188 369 description
+  section 369 1731 synopsis
+  section 1731 3981 methods
+  section 2142 2657 new
+  section 2657 2945 update
+  section 2945 3610 final
+  section 3610 3981 reset
+  section 3981 4264 prerequisites
+  section 4264 4949 installation
+  section 4949 6382 copyright and license
+  section 6382 6484 see also
+
+# END lua-resty-hmac
+# BEGIN lua-resty-jwt
+
+dist lua-resty-jwt-0.2.0
+  aliases resty.jwt
+  modules lua-resty-jwt-0.2.0
+
+module lua-resty-jwt-0.2.0
+  aliases resty.jwt
+  section 18 427 name
+  section 427 700 installation
+  section 700 725 version
+  section 725 819 status
+  section 819 1141 description
+  section 1141 2369 synopsis
+  section 2369 4799 methods
+  section 2777 3109 sign
+  section 2980 3109 sample of table_of_jwt
+  section 3109 3679 verify
+  section 3679 4322 load & verify
+  section 3943 4322 sample of jwt_obj
+  section 4322 4799 sign-jwe
+  section 4647 4799 sample of table_of_jwt
+  section 4799 88681 verification
+  section 6706 7221 sample claim_spec
+  section 7221 13237 jwt validators
+  section 7880 8039 validators.chain(...)
+  section 8039 8429 validators.required(chain_function)
+  section 8429 8693 validators.require_one_of(claim_keys)
+  section 8693 9322 validators.check(check_val, check_function, name, check_type) (opt)
+  section 9322 9505 validators.equals(check_val) (opt)
+  section 9505 9688 validators.matches(pattern) (opt)
+  section 9688 10332 validators.any_of(check_values, check_function, name, check_type, table_type) (opt)
+  section 10332 10481 validators.equals_any_of(check_values) (opt)
+  section 10481 10616 validators.matches_any_of(patterns) (opt)
+  section 10616 10953 validators.contains_any_of(check_values,name) (opt)
+  section 10953 11182 validators.greater_than(check_val) (opt)
+  section 11182 11421 validators.greater_than_or_equal(check_val) (opt)
+  section 11421 11647 validators.less_than(check_val) (opt)
+  section 11647 11883 validators.less_than_or_equal(check_val) (opt)
+  section 11883 12103 validators.is_not_before() (opt)
+  section 12103 12334 validators.is_not_expired() (opt)
+  section 12334 12591 validators.is_at() (opt)
+  section 12591 12767 validators.set_system_leeway(leeway)
+  section 12767 12932 validators.set_system_clock(clock)
+  section 12932 13237 sample claim_spec using validators
+  section 13237 88681 legacy/timeframe options
+  section 88404 88681 sample of validation_options usage
+  section 88681 88933 examples
+  section 88933 89528 installation
+  section 89528 89577 testing with docker
+  section 89577 89678 see also
+
+# END lua-resty-jwt
+# BEGIN lua-resty-mlcache
+
+dist lua-resty-mlcache-2.2.1
+  aliases resty.mlcache
+  modules lua-resty-mlcache-2.2.1
+
+module lua-resty-mlcache-2.2.1
+  aliases resty.mlcache
+  section 18 3628 lua-resty-mlcache
+  section 3628 5545 synopsis
+  section 5545 6142 requirements
+  section 6142 6527 installation
+  section 6527 33715 methods
+  section 6545 12856 new
+  section 12856 22915 get
+  section 22915 24814 peek
+  section 24814 26935 set
+  section 26935 27990 delete
+  section 27990 29433 purge
+  section 29433 33715 update
+  section 33715 33772 changelog
+  section 33772 34207 license
+
+# END lua-resty-mlcache

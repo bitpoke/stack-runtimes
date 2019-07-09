@@ -1,0 +1,12 @@
+account = thibaultcha
+name = lua-resty-mlcache
+abstract = Multi-level caching library for OpenResty
+author = Thibault Charbonnier (thibaultcha)
+is_original = yes
+license = mit
+repo_link = https://github.com/thibaultcha/lua-resty-mlcache
+lib_dir = lib
+doc_dir = lib
+version = 2.2.1
+main_module = lib/resty/mlcache.lua
+requires = openresty

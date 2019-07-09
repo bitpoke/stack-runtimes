@@ -1,0 +1,4 @@
+lualib/resty/evp.lua
+lualib/resty/jwt-validators.lua
+lualib/resty/jwt.lua
+pod/lua-resty-jwt-0.2.0/lua-resty-jwt-0.2.0.pod

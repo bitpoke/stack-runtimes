@@ -1,0 +1,152 @@
+#!/usr/bin/env php
+<?php
+ini_set("display_errors", "Off");
+
+if (count($argv) < 2) {
+    error_log("installer-get [--dry-run|-n] EXTENSIONS_MANIFEST");
+    exit(1);
+}
+
+if (count($argv) == 2) {
+    $manifest = $argv[1];
+} else {
+    $dryRun = ($argv[1] == "--dry-run" || $argv[1] == "-n");
+    $manifest = $argv[2];
+}
+
+########################################################################################################################
+
+function pecl_temp_dir() {
+    global $dryRun;
+    if ($dryRun) {
+        return "/tmp/pear/temp";
+    }
+    $baseDir = run("pecl", "config-get", "temp_dir");
+    return  rtrim($baseDir[0], "/");
+}
+
+function run() {
+    global $dryRun;
+    $args = func_get_args();
+    echo "+ " . join(" ", $args) . PHP_EOL;
+    $cmd = join(' ', array_map('escapeshellarg', $args));
+    $lines = array();
+    if (!$dryRun) {
+        $last_line = exec($cmd, $lines, $return);
+        if ($return != 0) {
+            error_log("Exec error $return: $last_line");
+            exit($return);
+        }
+    }
+    return $lines;
+}
+
+function changeDir($dir) {
+    global $dryRun;
+    if ($dryRun) {
+        run("cd", $dir);
+    } elseif(chdir($dir) === false) {
+        error_log("Could not change directory to $dir");
+        exit(1);
+    }
+}
+
+function install_extension($name, $buildArgs = array()) {
+    if (count($buildArgs) > 0) {
+        $cmd = array("docker-php-ext-configure", $name);
+        run(...array_merge($cmd, $buildArgs));
+    }
+    $cmd = array("docker-php-ext-install", $name);
+    run(...$cmd);
+}
+
+function install_pecl_extension(string $ext, string $name, string $version, $buildArgs = array(), string $priority) {
+    global $dryRun;
+    $cwd = getcwd();
+    $extDir = pecl_temp_dir() . "/$ext";
+
+    run("pecl", "install", "--onlyreqdeps", "--nobuild", "$ext-$version");
+    changeDir($extDir);
+    run("phpize");
+    run("./configure", ...$buildArgs);
+    run("make", "-j", "4");
+    run("make", "install");
+    run("docker-php-ext-enable", "--ini-name", "$priority-docker-php-ext-$name.ini", $name);
+    changeDir($cwd);
+}
+
+function cleanup($buildDeps) {
+    $libs = run('find', PHP_EXTENSION_DIR,'-type', 'f', '-name', '*.so');
+    $pkgs = array();
+
+    $libFiles = array();
+    foreach ( $libs as $lib ) {
+        $libDeps = run('ldd', $lib);
+        foreach( $libDeps as $libDep ) {
+            if ( strpos( $libDep, "=>" ) !== false ) {
+                $libDep = preg_replace('/\s+/i', ' ', trim($libDep));
+                $_l = explode( " ", $libDep );
+                $libFiles[] = $_l[ count($_l) - 2 ];
+            }
+        }
+    }
+    $libFiles = array_unique($libFiles);
+
+    foreach ( $libFiles as $libFile ) {
+        $pkg = run('dpkg-query', '-S', $libFile);
+        $pkg = preg_replace('/^([^:]+):.*$/s', '$1', $pkg[0]);
+        $pkgs[] = $pkg;
+    }
+    $pkgs = array_unique( $pkgs );
+
+    run('apt-mark', 'manual', ...$pkgs);
+    run('apt-get', 'autoremove', '-y', '--purge', ...$buildDeps);
+}
+
+function main() {
+    global $manifest;
+    if (false === $extensions = yaml_parse_file( $manifest )) {
+        error_log("Could not parse manifest file.");
+        exit(1);
+    }
+
+    $build_deps = array();
+    $rt_deps = array();
+
+    foreach ($extensions as $extension) {
+        if (!empty($extension["depends"])) {
+            $rt_deps = array_unique(array_merge($rt_deps, $extension["depends"]));
+        }
+        if (!empty($extension["build"]["depends"])) {
+            $build_deps = array_unique(array_merge($build_deps, $extension["build"]["depends"]));
+        }
+    }
+
+    run("apt-get", "install", "--no-install-recommends", "-y", ...$build_deps, ...$rt_deps);
+    run("apt-mark", "auto", ...$build_deps);
+
+    foreach ($extensions as $extension) {
+        $name = $extension["name"];
+        $type = @$extension["type"] ?: "";
+        $buildArgs = @$extension["build"]["args"] ?: array();
+        if (extension_loaded($name)) {
+            error_log("!!!! Skipping $name as it's already installed");
+            continue;
+        }
+
+        switch($type) {
+        case "pecl":
+            $peclName = @$extension["pecl_name"] ?: $name;
+            $peclVersion = @$extension["version"] ?: "stable";
+            $priority = @$extension["priority"] ?: "50";
+            install_pecl_extension($peclName, $name, $peclVersion, $buildArgs, $priority);
+            break;
+        default:
+            install_extension($name, $buildArgs);
+            break;
+        }
+    }
+    cleanup($build_deps);
+}
+
+main();

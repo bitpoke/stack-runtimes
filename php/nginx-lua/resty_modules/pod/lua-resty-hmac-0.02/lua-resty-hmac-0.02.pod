@@ -1,0 +1,257 @@
+=encoding utf-8
+
+
+=head1 Name
+
+lua-resty-hmac - HMAC functions for ngx_lua and LuaJIT
+
+
+=head1 Status
+
+This library is still under active development and is considered production ready.
+
+
+=head1 Description
+
+This library requires an nginx build with OpenSSL,
+the L<ngx_lua module|http://wiki.nginx.org/HttpLuaModule>, and L<LuaJIT 2.0|http://luajit.org/luajit.html>.
+
+
+=head1 Synopsis
+
+
+        # nginx.conf:
+    
+        lua_package_path "/path/to/lua-resty-hmac/lib/?.lua;;";
+    
+        server {
+            location = /test {
+                content_by_lua_file conf/test.lua;
+            }
+        }
+    
+        -- conf/test.lua:
+    
+        local hmac = require "resty.hmac"
+    
+        local hmac_sha1 = hmac:new("secret_key", hmac.ALGOS.SHA1)
+        if not hmac_sha1 then
+            ngx.say("failed to create the hmac_sha1 object")
+            return
+        end
+    
+        local ok = hmac_sha1:update("he")
+        if not ok then
+            ngx.say("failed to add data")
+            return
+        end
+    
+        ok = hmac_sha1:update("llo")
+        if not ok then
+            ngx.say("failed to add data")
+            return
+        end
+    
+        local mac = hmac_sha1:final()  -- binary mac
+    
+        local str = require "resty.string"
+        ngx.say("hmac_sha1: ", str.to_hex(mac))
+            -- output: "hmac_sha1: aee4b890b574ea8fa4f6a66aed96c3e590e5925a"
+    
+        -- dont forget to reset after final!
+        if not hmac_sha1:reset() then
+            ngx.say("failed to reset hmac_sha1")
+            return
+        end
+    
+        -- short version
+        ngx.say("hmac_sha1: ", hmac_sha1:final("world", true))
+            -- output: "hmac_sha1: 4e9538f1efbe565c522acfb72fce6092ea6b15e0"
+
+
+
+
+=head1 Methods
+
+To load this library,
+
+
+=over
+
+
+=item 1.
+
+you need to specify this library's path in ngx_lua's L<lua_package_path|https://github.com/openresty/lua-nginx-module#lua_package_path> directive. For example, C<lua_package_path "/path/to/lua-resty-hmac/lib/?.lua;;";>.
+
+=item 2.
+
+you use C<require> to load the library into a local Lua variable:
+
+
+=back
+
+
+        local hmac = require "resty.hmac"
+
+
+
+
+=head2 new
+
+C<syntax: local hmac_sha256 = hmac:new(key [, hash_algorithm])>
+
+Creates a new hmac instance. If failed, returns C<nil>.
+
+The C<key> argument specifies the key to use when calculating the message authentication code (MAC).
+C<key> is a lua string which may contain printable characters or binary data.
+
+The C<hash_algorithm> argument specifies which hashing algorithm to use (C<hash.ALGOS.MD5>, C<hash.ALGOS.SHA1>, C<hash.ALGOS.SHA256>, C<hash.ALGOS.SHA512>).
+The default value is C<hash.ALGOS.MD5>.
+
+
+
+
+=head2 update
+
+C<syntax: hmac_sha256:update(data)>
+
+Updates the MAC calculation to include new data. If failed, returns C<false>.
+
+The C<data> argument specifies the additional data to include in the MAC.
+C<data> is a lua string which may contain printable characters or binary data.
+
+
+
+
+=head2 final
+
+C<syntax: local mac = hmac_sha256:final([data, output_hex])>
+
+Finalizes the MAC calculation and returns the final MAC value. If failed, returns C<nil>.
+When C<output_hex> is not C<true> returns a lua string containing the raw, binary MAC. When C<output_hex> is C<true> returns a lua string containing the hexadecimal representation of the MAC.
+
+The C<data> argument specifies the additional data to include in the MAC before finalizing the calculation.
+The default value is C<nil>.
+
+The C<output_hex> argument specifies wether the MAC should be returned as hex or binary. If C<true> the MAC will be returned as hex.
+The default value is C<false>.
+
+
+
+
+=head2 reset
+
+C<syntax: hmac_sha256:reset()>
+
+Resets the internal hmac context so it can be re-used to calculate a new MAC. If failed, returns C<false>.
+If successful, the C<key> and C<hash_algorithm> remain the same but all other information is cleared.
+
+This MUST be called after C<hmac_sha256:final()> in order to calculate a new MAC using the same hmac instance.
+
+
+
+
+=head1 Prerequisites
+
+
+=over
+
+
+=item *
+
+L<LuaJIT|http://luajit.org> 2.0+
+
+=item *
+
+L<ngx_lua module|http://wiki.nginx.org/HttpLuaModule>
+
+=item *
+
+L<lua-resty-string|https://github.com/openresty/lua-resty-string> 0.8+
+
+=item *
+
+L<OpenSSL|https://www.openssl.org/> 1.0.0+
+
+
+=back
+
+
+
+
+=head1 Installation
+
+It is recommended to use the latest L<ngx_openresty bundle|http://openresty.org> directly. You'll need to enable LuaJIT when building your ngx_openresty
+bundle by passing the C<--with-luajit> option to its C<./configure> script.
+
+Also, You need to configure
+the L<lua_package_path|https://github.com/openresty/lua-nginx-module#lua_package_path> directive to
+add the path of your lua-resty-hmac source tree to ngx_lua's Lua module search path, as in
+
+
+        # nginx.conf
+        http {
+            lua_package_path "/path/to/lua-resty-hmac/lib/?.lua;;";
+            ...
+        }
+
+and then load the library in Lua:
+
+
+        local hmac = require "resty.hmac"
+
+
+
+
+=head1 Copyright and License
+
+This module is licensed under the BSD license.
+
+Copyright (C) 2012-2017, Thought Foundry Inc.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+
+=over
+
+
+=item *
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+
+=back
+
+
+=over
+
+
+=item *
+
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+
+=back
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+
+
+=head1 See Also
+
+
+=over
+
+
+=item *
+
+the ngx_lua module: http://wiki.nginx.org/HttpLuaModule
+
+
+=back
+
+
+

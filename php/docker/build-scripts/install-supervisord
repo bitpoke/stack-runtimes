@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# A shell script for installing supervisord
+set -eo pipefail
+
+TMP="$(mktemp -d)"
+cleanup() {
+    rm -rf "${TMP}"
+}
+trap cleanup EXIT
+
+RELEASE_URL="https://github.com/ochinchina/supervisord/releases/download/v${SUPERVISORD_VERSION}"
+BIN_FILE="supervisord_${SUPERVISORD_VERSION}_linux_amd64"
+CHECKSUMS_FILE="supervisord_${SUPERVISORD_VERSION}_checksums.txt"
+
+set -x
+curl -sL "${RELEASE_URL}/${CHECKSUMS_FILE}" -o "${TMP}/${CHECKSUMS_FILE}"
+curl -sL "${RELEASE_URL}/${BIN_FILE}" -o "${TMP}/${BIN_FILE}"
+cd "${TMP}"
+sha256sum --ignore-missing -c "${CHECKSUMS_FILE}"
+chmod +x "${TMP}/${BIN_FILE}"
+mv "${TMP}/${BIN_FILE}" /usr/local/bin/supervisord

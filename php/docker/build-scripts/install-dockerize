@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# A shell script for installing dockerize
+set -eo pipefail
+
+TMP="$(mktemp -d)"
+cleanup() {
+    rm -rf "${TMP}"
+}
+trap cleanup EXIT
+
+RELEASE_URL="https://github.com/presslabs/dockerize/releases/download/v${DOCKERIZE_VERSION}"
+ARCHIVE_FILE="dockerize-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz"
+
+set -x
+curl -sL "${RELEASE_URL}/${ARCHIVE_FILE}" -o "${TMP}/${ARCHIVE_FILE}"
+tar -C "${TMP}" -xzvf "${TMP}/${ARCHIVE_FILE}"
+chmod +x "${TMP}/dockerize"
+mv "${TMP}/dockerize" /usr/local/bin/dockerize
