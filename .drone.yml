@@ -6,7 +6,7 @@ pipeline:
     registry: quay.io
     repo: quay.io/presslabs/php-runtime
     username: presslabs+drone
-    tags: ["${PHP_SERIES}-${DRONE_BRANCH/master/latest}", "${PHP_VERSION}", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
+    tags: ["${PHP_SERIES}-latest", "${PHP_VERSION}", "${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
     cache_from: ["quay.io/presslabs/php-runtime:${PHP_SERIES}-${DRONE_BRANCH/master/latest}"]
     build_args:
       - PHP_VERSION=${PHP_VERSION}
@@ -17,7 +17,48 @@ pipeline:
       event: push
       branch: master
 
+  publish-bedrock-runtime-image:
+    group: publish-wordpress-runtime
+    image: plugins/docker
+    context: wordpress
+    dockerfile: wordpress/Dockerfile
+    target: bedrock
+    squash: true
+    registry: quay.io
+    repo: quay.io/presslabs/wordpress-runtime
+    username: presslabs+drone
+    tags: ["bedrock-php${PHP_SERIES}-latest", "bedrock-php${PHP_VERSION}", "bedrock-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
+    build_args:
+      - BASE_IMAGE=quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
+    secrets:
+      - source: QUAY_TOKEN
+        target: DOCKER_PASSWORD
+    when:
+      event: push
+      branch: master
+
+  publish-bedrock-builder-image:
+    group: publish-wordpress-runtime
+    image: plugins/docker
+    context: wordpress
+    dockerfile: wordpress/Dockerfile
+    target: bedrock-build
+    squash: true
+    registry: quay.io
+    repo: quay.io/presslabs/wordpress-runtime
+    username: presslabs+drone
+    tags: ["bedrock-builder-php${PHP_SERIES}-latest", "bedrock-builder-php${PHP_VERSION}", "bedrock-builder-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
+    build_args:
+      - BASE_IMAGE=quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
+    secrets:
+      - source: QUAY_TOKEN
+        target: DOCKER_PASSWORD
+    when:
+      event: push
+      branch: master
+
   publish-worpress-runtime-image:
+    group: publish-wordpress-runtime
     image: plugins/docker
     context: wordpress
     dockerfile: wordpress/Dockerfile
@@ -36,11 +77,9 @@ pipeline:
     when:
       event: push
       branch: master
-      matrix:
-        PHP_SERIES: 7.3
 
 matrix:
   include:
     - PHP_SERIES: "7.3"
       PHP_VERSION: "7.3.6"
-      WORDPRESS_VERSION: "5.2.1"
+      WORDPRESS_VERSION: "5.2.2"
