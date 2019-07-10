@@ -1,3 +1,16 @@
+templates:
+  publish-wordpress: &publish-wordpress
+    image: plugins/docker
+    registry: quay.io
+    repo: quay.io/presslabs/wordpress-runtime
+    context: wordpress
+    dockerfile: wordpress/Dockerfile
+    squash: true
+    username: presslabs+drone
+    secrets:
+      - source: QUAY_TOKEN
+        target: DOCKER_PASSWORD
+
 pipeline:
   publish-php-runtime-image:
     image: plugins/docker
@@ -17,63 +30,54 @@ pipeline:
       event: push
       branch: master
 
-  publish-bedrock-runtime-image:
-    group: publish-wordpress-runtime
-    image: plugins/docker
-    context: wordpress
-    dockerfile: wordpress/Dockerfile
-    target: bedrock
-    squash: true
-    registry: quay.io
-    repo: quay.io/presslabs/wordpress-runtime
-    username: presslabs+drone
-    tags: ["bedrock-php${PHP_SERIES}-latest", "bedrock-php${PHP_VERSION}", "bedrock-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
+  publish-worpress-runtime-image:
+    <<: *publish-wordpress
+    target: classic
+    tags:
+      - ${WORDPRESS_VERSION}
+      - ${WORDPRESS_VERSION}-php${PHP_SERIES}
+      - ${WORDPRESS_VERSION}-php${PHP_SERIES}-r${DRONE_BUILD_NUMBER}
+      - ${WORDPRESS_VERSION}-php${PHP_VERSION}
+      - ${WORDPRESS_VERSION}-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
     build_args:
       - BASE_IMAGE=quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
-    secrets:
-      - source: QUAY_TOKEN
-        target: DOCKER_PASSWORD
+      - WP_VERSION=${WORDPRESS_VERSION}
+    when:
+      event: push
+      branch: master
+
+  publish-bedrock-runtime-image:
+    <<: *publish-wordpress
+    group: publish-bedrock
+    target: bedrock
+    tags:
+      - bedrock
+      - bedrock-php${PHP_SERIES}
+      - bedrock-php${PHP_SERIES}-r${DRONE_BUILD_NUMBER}
+      - bedrock-php${PHP_VERSION}
+      - bedrock-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
+    build_args:
+      - BASE_IMAGE=quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
+    cache_from:
+      - ${WORDPRESS_VERSION}-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
     when:
       event: push
       branch: master
 
   publish-bedrock-builder-image:
-    group: publish-wordpress-runtime
-    image: plugins/docker
-    context: wordpress
-    dockerfile: wordpress/Dockerfile
+    <<: *publish-wordpress
     target: bedrock-build
-    squash: true
-    registry: quay.io
-    repo: quay.io/presslabs/wordpress-runtime
-    username: presslabs+drone
-    tags: ["bedrock-builder-php${PHP_SERIES}-latest", "bedrock-builder-php${PHP_VERSION}", "bedrock-builder-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}"]
+    group: publish-bedrock
+    tags:
+      - bedrock-build
+      - bedrock-build-php${PHP_SERIES}
+      - bedrock-build-php${PHP_SERIES}-r${DRONE_BUILD_NUMBER}
+      - bedrock-build-php${PHP_VERSION}
+      - bedrock-build-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
     build_args:
       - BASE_IMAGE=quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
-    secrets:
-      - source: QUAY_TOKEN
-        target: DOCKER_PASSWORD
-    when:
-      event: push
-      branch: master
-
-  publish-worpress-runtime-image:
-    group: publish-wordpress-runtime
-    image: plugins/docker
-    context: wordpress
-    dockerfile: wordpress/Dockerfile
-    target: classic
-    squash: true
-    registry: quay.io
-    repo: quay.io/presslabs/wordpress-runtime
-    username: presslabs+drone
-    tags: ["${WORDPRESS_VERSION}", "${WORDPRESS_VERSION}-php${PHP_SERIES}", "${WORDPRESS_VERSION}-php${PHP_SERIES}-r${DRONE_BUILD_NUMBER}"]
-    build_args:
-      - BASE_IMAGE=quay.io/presslabs/php-runtime:${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
-      - WP_VERSION=${WORDPRESS_VERSION}
-    secrets:
-      - source: QUAY_TOKEN
-        target: DOCKER_PASSWORD
+    cache_from:
+      - ${WORDPRESS_VERSION}-php${PHP_VERSION}-r${DRONE_BUILD_NUMBER}
     when:
       event: push
       branch: master
