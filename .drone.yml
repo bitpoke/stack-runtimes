@@ -85,5 +85,5 @@ pipeline:
 matrix:
   include:
     - PHP_SERIES: "7.3"
-      PHP_VERSION: "7.3.6"
+      PHP_VERSION: "7.3.7"
       WORDPRESS_VERSION: "5.2.2"

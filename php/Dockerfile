@@ -1,4 +1,4 @@
-ARG PHP_VERSION=7.3.6
+ARG PHP_VERSION=7.3.7
 FROM php:${PHP_VERSION}-fpm-stretch as php
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG FLAVOUR=minimal
