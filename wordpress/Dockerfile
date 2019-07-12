@@ -17,6 +17,7 @@ USER www-data
 
 FROM base as bedrock
 ENV DOCUMENT_ROOT=/app/web
+ENV MEDIA_BUCKET_PATH=/app/uploads
 
 ###############################################################################
 
@@ -36,6 +37,7 @@ ONBUILD RUN cp -a /src/. /app
 
 FROM base as classic
 ARG WP_VERSION=latest
+ENV MEDIA_BUCKET_PATH=/wp-content/uploads
 RUN set -ex \
     && wp core download --path=html --version=${WP_VERSION}
 ONBUILD COPY --chown=www-data:www-data wp-config.php /app/html/wp-config.php
