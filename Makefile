@@ -1,8 +1,10 @@
 REGISTRY ?= quay.io/presslabs
-TAG_SUFFIX ?= canary
 PHP_VERSION ?= 7.3.7
 WORDPRESS_VERSION ?= 5.2.2
 BUILD_TAG ?= build
+ifndef CI
+TAG_SUFFIX ?= canary
+endif
 
 GIT_COMMIT ?= $(shell git describe --always --abbrev=40 --dirty)
 
