@@ -54,6 +54,13 @@ push-images: images
 		docker push $(WORDPRESS_RUNTIME_REGISTRY):$${tag}; \
 	done
 
+.PHONY: pull-cache
+pull-cache:
+	docker pull $(PHP_RUNTIME_REGISTRY):$(PHP_SERIES) || true
+	docker pull $(PHP_RUNTIME_REGISTRY):$(PHP_VERSION) || true
+	docker pull $(PHP_RUNTIME_REGISTRY):$(lastword $(PHP_TAGS)) || true
+
+
 .build/tmp: | .build
 	mkdir -p "$@"
 

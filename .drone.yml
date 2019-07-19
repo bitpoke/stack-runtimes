@@ -11,6 +11,7 @@ steps:
   pull: always
   image: quay.io/presslabs/bfc
   commands:
+    - make pull-cache
     - make images
   volumes:
   - name: dockersock
