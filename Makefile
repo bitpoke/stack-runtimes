@@ -62,6 +62,9 @@ pull-cache:
 	docker pull $(PHP_RUNTIME_REGISTRY):$(PHP_VERSION) || true
 	docker pull $(PHP_RUNTIME_REGISTRY):$(lastword $(PHP_TAGS)) || true
 
+.PHONY: test
+test: images
+	./hack/container-structure-test test --config php/test/config.yaml --image local.build/runtimes/php:$(BUILD_TAG)
 
 .build/tmp: | .build
 	mkdir -p "$@"

@@ -1,0 +1,46 @@
+schemaVersion: 2.0.0
+
+commandTests:
+  - name: check php is installed
+    command: "which"
+    args: ["php"]
+    expectedOutput: ["/usr/local/bin/php\n"]
+
+  - name: check php-fpm is installed
+    command: "which"
+    args: ["php-fpm"]
+    expectedOutput: ["/usr/local/sbin/php-fpm\n"]
+
+  - name: check openresty is installed
+    command: "which"
+    args: ["openresty"]
+    expectedOutput: ["/usr/bin/openresty\n"]
+
+fileExistenceTests:
+- &www-data
+  name: 'app'
+  path: '/app'
+  shouldExist: true
+  permissions: 'drwxr-xr-x'
+  uid: 33
+  gid: 33
+- <<: *www-data
+  name: '/app/html'
+  path: '/app/html'
+- <<: *www-data
+  name: '/var/lib/nginx'
+  path: '/var/lib/nginx'
+- <<: *www-data
+  name: '/var/lib/composer'
+  path: '/var/lib/composer'
+  permissions: 'drwxrwxrwx'
+- <<: *www-data
+  name: '/var/lib/composer/cache'
+  path: '/var/lib/composer/cache'
+  permissions: 'drwxrwxrwx'
+
+metadataTest:
+  env:
+    - key: PORT
+      value: 8080
+  exposedPorts: ["8080"]

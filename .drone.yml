@@ -11,7 +11,7 @@ clone:
   tags: true
 
 steps:
-- name: build images
+- name: build
   pull: always
   image: quay.io/presslabs/bfc
   environment:
@@ -23,7 +23,18 @@ steps:
   - name: dockersock
     path: /var/run
 
-- name: publish images
+- name: test
+  pull: always
+  image: quay.io/presslabs/bfc
+  environment:
+    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+  commands:
+    - make test
+  volumes:
+  - name: dockersock
+    path: /var/run
+
+- name: publish
   image: quay.io/presslabs/bfc
   environment:
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
