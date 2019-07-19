@@ -43,4 +43,6 @@ metadataTest:
   env:
     - key: PORT
       value: 8080
+    - key: DOCUMENT_ROOT
+      value: /app/html
   exposedPorts: ["8080"]

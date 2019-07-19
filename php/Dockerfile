@@ -4,6 +4,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV PATH="/usr/local/docker/bin:${PATH}"
 ENV PHP_VERSION=${PHP_VERSION}
 ENV PORT=8080
+ENV DOCUMENT_ROOT=/app/html
+
 ENV COMPOSER_VERSION=1.8.6
 ENV SUPERVISORD_VERSION=0.6.3
 ENV DOCKERIZE_VERSION=1.2.0
@@ -13,7 +15,6 @@ ENV GRPC_ENABLE_FORK_SUPPORT=1
 ENV GRPC_POLL_STRATEGY=epoll1
 # keep wp-cli happy
 ENV PAGER=cat
-
 
 # configure composer
 ENV COMPOSER_CACHE_DIR=/var/lib/composer/cache
