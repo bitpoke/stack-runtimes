@@ -123,6 +123,7 @@ include var.Makefile
 
 .build/test/wordpress: .build/runtimes/wordpress
 	docker build -t local$@:$(BUILD_TAG) --build-arg BASE_IMAGE=local$<:$(BUILD_TAG) -f wordpress/tests/classic/Dockerfile wordpress/tests/classic
+	./hack/container-structure-test test --config wordpress/tests/classic/config.yaml --image local$@:$(BUILD_TAG)
 
 .build/runtimes/bedrock: .build/var/REGISTRY \
                          $(WORDPRESS_RUNTIME_SRCS) \
