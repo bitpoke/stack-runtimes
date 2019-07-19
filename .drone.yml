@@ -14,7 +14,8 @@ steps:
 - name: build
   pull: always
   image: quay.io/presslabs/bfc
-  environment:
+  environment: &baseEnv
+    PHP_VERSION: 7.3.7
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
   commands:
     - make pull-cache
@@ -27,7 +28,7 @@ steps:
   image: quay.io/presslabs/bfc
   depends_on: [build]
   environment:
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+    <<: *baseEnv
   commands:
     - make .build/test/php
   volumes:
@@ -38,7 +39,7 @@ steps:
   image: quay.io/presslabs/bfc
   depends_on: [build]
   environment:
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+    <<: *baseEnv
   commands:
     - make .build/test/wordpress
   volumes:
@@ -51,7 +52,7 @@ steps:
     - test wordpress image
   image: quay.io/presslabs/bfc
   environment:
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+    <<: *baseEnv
     DOCKER_USER: "presslabs+drone"
     DOCKER_PASSWORD:
       from_secret: QUAY_TOKEN
@@ -78,5 +79,3 @@ services:
 volumes:
 - name: dockersock
   temp: {}
-
-
