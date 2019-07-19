@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=quay.io/presslabs/php-runtime:7.3-latest
 FROM ${BASE_IMAGE} as base
 
-ENV WP_CLI_VERSION=2.1.0
+ENV WP_CLI_VERSION=2.2.0
 USER root
 COPY docker/build-scripts /usr/local/docker/build-scripts/
 RUN set -ex \
@@ -36,9 +36,9 @@ ONBUILD RUN cp -a /src/. /app
 ###############################################################################
 
 FROM base as classic
-ARG WP_VERSION=latest
+ARG WORDPRESS_VERSION=latest
 ENV MEDIA_BUCKET_PATH=/wp-content/uploads
 RUN set -ex \
-    && wp core download --path=html --version=${WP_VERSION}
+    && wp core download --path=html --version=${WORDPRESS_VERSION}
 ONBUILD COPY --chown=www-data:www-data wp-config.php /app/html/wp-config.php
 ONBUILD COPY --chown=www-data:www-data wp-content /app/html/wp-content

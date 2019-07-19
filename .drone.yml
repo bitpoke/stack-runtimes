@@ -7,119 +7,25 @@ platform:
   arch: amd64
 
 steps:
-- name: publish-php-runtime-image
-  pull: default
-  image: plugins/docker
-  settings:
-    build_args:
-    - PHP_VERSION=7.3.7
-    cache_from:
-    - quay.io/presslabs/php-runtime:7.3-${DRONE_BRANCH/master/latest}
-    context: php
-    dockerfile: php/Dockerfile
-    registry: quay.io
-    repo: quay.io/presslabs/php-runtime
-    tags:
-    - 7.3-latest
-    - 7.3.7
-    - 7.3.7-r${DRONE_BUILD_NUMBER}
-    username: presslabs+drone
-  environment:
-    DOCKER_PASSWORD:
-      from_secret: QUAY_TOKEN
-  when:
-    branch:
-    - master
-    event:
-    - push
+- name: build images
+  pull: always
+  image: quay.io/presslabs/bfc
+  commands:
+    - make images
+  volumes:
+  - name: dockersock
+    path: /var/run
 
-- name: publish-worpress-runtime-image
-  pull: default
-  image: plugins/docker
-  settings:
-    build_args:
-    - BASE_IMAGE=quay.io/presslabs/php-runtime:7.3.7-r${DRONE_BUILD_NUMBER}
-    - WP_VERSION=5.2.2
-    context: wordpress
-    dockerfile: wordpress/Dockerfile
-    registry: quay.io
-    repo: quay.io/presslabs/wordpress-runtime
-    squash: true
-    tags:
-    - 5.2.2
-    - 5.2.2-php7.3
-    - 5.2.2-php7.3-r${DRONE_BUILD_NUMBER}
-    - 5.2.2-php7.3.7
-    - 5.2.2-php7.3.7-r${DRONE_BUILD_NUMBER}
-    target: classic
-    username: presslabs+drone
-  environment:
-    DOCKER_PASSWORD:
-      from_secret: QUAY_TOKEN
-  when:
-    branch:
-    - master
-    event:
-    - push
+services:
+- name: docker
+  image: docker:dind
+  privileged: true
+  volumes:
+  - name: dockersock
+    path: /var/run
 
-- name: publish-bedrock-runtime-image
-  pull: default
-  image: plugins/docker
-  settings:
-    build_args:
-    - BASE_IMAGE=quay.io/presslabs/php-runtime:7.3.7-r${DRONE_BUILD_NUMBER}
-    cache_from:
-    - 5.2.2-php7.3.7-r${DRONE_BUILD_NUMBER}
-    context: wordpress
-    dockerfile: wordpress/Dockerfile
-    group: publish-bedrock
-    registry: quay.io
-    repo: quay.io/presslabs/wordpress-runtime
-    squash: true
-    tags:
-    - bedrock
-    - bedrock-php7.3
-    - bedrock-php7.3-r${DRONE_BUILD_NUMBER}
-    - bedrock-php7.3.7
-    - bedrock-php7.3.7-r${DRONE_BUILD_NUMBER}
-    target: bedrock
-    username: presslabs+drone
-  environment:
-    DOCKER_PASSWORD:
-      from_secret: QUAY_TOKEN
-  when:
-    branch:
-    - master
-    event:
-    - push
+volumes:
+- name: dockersock
+  temp: {}
 
-- name: publish-bedrock-builder-image
-  pull: default
-  image: plugins/docker
-  settings:
-    build_args:
-    - BASE_IMAGE=quay.io/presslabs/php-runtime:7.3.7-r${DRONE_BUILD_NUMBER}
-    cache_from:
-    - 5.2.2-php7.3.7-r${DRONE_BUILD_NUMBER}
-    context: wordpress
-    dockerfile: wordpress/Dockerfile
-    group: publish-bedrock
-    registry: quay.io
-    repo: quay.io/presslabs/wordpress-runtime
-    squash: true
-    tags:
-    - bedrock-build
-    - bedrock-build-php7.3
-    - bedrock-build-php7.3-r${DRONE_BUILD_NUMBER}
-    - bedrock-build-php7.3.7
-    - bedrock-build-php7.3.7-r${DRONE_BUILD_NUMBER}
-    target: bedrock-build
-    username: presslabs+drone
-  environment:
-    DOCKER_PASSWORD:
-      from_secret: QUAY_TOKEN
-  when:
-    branch:
-    - master
-    event:
-    - push
+

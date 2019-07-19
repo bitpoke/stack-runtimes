@@ -17,8 +17,8 @@ ENV GRPC_POLL_STRATEGY=epoll1
 ENV PAGER=cat
 
 # configure composer
-ENV COMPOSER_CACHE_DIR=/tmp/composer/.cache
-ENV COMPOSER_HOME=/tmp/composer
+ENV COMPOSER_CACHE_DIR=/var/lib/composer/cache
+ENV COMPOSER_HOME=/var/lib/composer
 ENV COMPOSER_NO_INTERACTION=1
 
 # install openresty and minimal requirements

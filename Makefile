@@ -1,35 +1,146 @@
-REGISTRY := quay.io/presslabs
+REGISTRY ?= quay.io/presslabs
+TAG_SUFFIX ?= canary
+PHP_VERSION ?= 7.3.7
+WORDPRESS_VERSION ?= 5.2.2
+BUILD_TAG ?= build
+
+GIT_COMMIT ?= $(shell git describe --always --abbrev=40 --dirty)
+
+PHP_RUNTIME_REGISTRY := $(REGISTRY)/php-runtime
+PHP_RUNTIME_SRCS := $(shell find php -type f)
+PHP_SERIES ?= $(shell ./hack/php-series $(PHP_VERSION))
+PHP_TAGS := $(PHP_SERIES) $(PHP_VERSION)
+
+WORDPRESS_RUNTIME_REGISTRY := $(REGISTRY)/wordpress-runtime
+WORDPRESS_RUNTIME_SRCS := $(shell find wordpress -type f)
+WORDPRESS_TAGS := $(WORDPRESS_VERSION) $(patsubst %,$(WORDPRESS_VERSION)-php-%,$(PHP_TAGS))
+BEDROCK_TAGS := bedrock $(patsubst %,bedrock-php-%,$(PHP_TAGS))
+BEDROCK_BUILD_TAGS := bedrock-build $(patsubst %,bedrock-build-php-%,$(PHP_TAGS))
+
+ifdef TAG_SUFFIX
+PHP_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(PHP_TAGS))
+WORDPRESS_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(WORDPRESS_TAGS))
+BEDROCK_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(BEDROCK_TAGS))
+BEDROCK_BUILD_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(BEDROCK_BUILD_TAGS))
+endif
+
 IMAGE_NAME := php-runtime
 IMAGE_TAGS := canary
 BUILD_TAG := build
-GIT_COMMIT ?= $(shell git rev-parse HEAD)
 CONTEXT_DIR ?= $(PWD)
 build_args+= --build-arg PHP_VERSION=$(PHP_VERSION)
 
-ifndef PHP_VERSION
-$(error PHP_VERSION is not set)
-endif
+define print_target
+  @$(call print_notice,Building $@...)
+endef
 
-# Docker image targets
-######################
+define print_notice
+  printf "\n\033[93m\033[1m$(1)\033[0m\n"
+endef
+
+define print_error
+  printf "\n\033[93m\033[1m$(1)\033[0m\n"
+endef
+
 .PHONY: images
-images:
-	docker build --pull \
-		--build-arg VCS_REF=$(GIT_COMMIT) $(build_args) \
-		-t $(REGISTRY)/$(IMAGE_NAME):$(PHP_VERSION)-$(BUILD_TAG) \
-		-f ./Dockerfile $(CONTEXT_DIR)
-	set -e; \
-		for tag in $(IMAGE_TAGS); do \
-			docker tag $(REGISTRY)/$(IMAGE_NAME):$(PHP_VERSION)-$(BUILD_TAG) $(REGISTRY)/$(IMAGE_NAME):$(PHP_VERSION)-$${tag}; \
+images: php-runtime wordpress-runtime bedrock-runtime
+
+.PHONY: push-images
+push-images: images
+	for tag in $(PHP_TAGS); do \
+		docker push $(PHP_RUNTIME_REGISTRY):$${tag}; \
+	done
+	for tag in $(WORDPRESS_TAGS) $(BEDROCK_TAGS) $(BEDROCK_BUILD_TAGS); do \
+		docker push $(WORDPRESS_RUNTIME_REGISTRY):$${tag}; \
 	done
 
-.PHONY: publish
-publish: images
-	set -e; \
-		for tag in $(IMAGE_TAGS); do \
-		docker push $(REGISTRY)/$(IMAGE_NAME):$(PHP_VERSION)-$${tag}; \
-	done
+.build/tmp: | .build
+	mkdir -p "$@"
 
 .PHONY: clean
-clean:
-	docker rmi $(REGISTRY)/$(IMAGE_NAME):$(PHP_VERSION)-$(BUILD_TAG)
+clean::
+	rm -Rf .build
+
+.PHONY: php-runtime
+php-runtime: .build/runtimes/php
+
+.PHONY: wordpress-runtime
+wordpress-runtime: .build/runtimes/wordpress
+
+.PHONY: bedrock-runtime
+bedrock-runtime: .build/runtimes/bedrock .build/runtimes/bedrock-build
+
+include var.Makefile
+
+.build/runtimes: | .build
+	mkdir -p "$@"
+
+.build/runtimes/php: .build/var/PHP_VERSION \
+                     .build/var/PHP_SERIES \
+                     .build/var/REGISTRY \
+                     .build/var/PHP_TAGS \
+                     $(PHP_RUNTIME_SRCS) \
+                     | .build/runtimes
+	$(call print_target, $@)
+	docker build \
+		--build-arg VCS_REF=$(GIT_COMMIT) \
+		--build-arg PHP_VERSION=$(PHP_VERSION) \
+		--cache-from $(PHP_RUNTIME_REGISTRY):$(PHP_SERIES) \
+		--cache-from $(PHP_RUNTIME_REGISTRY):$(PHP_VERSION) \
+		--cache-from $(PHP_RUNTIME_REGISTRY):$(lastword $(PHP_TAGS)) \
+		--tag local$@:$(BUILD_TAG) \
+		-f php/Dockerfile php
+	set -e; \
+		for tag in $(PHP_TAGS); do \
+			docker tag local$@:$(BUILD_TAG) $(PHP_RUNTIME_REGISTRY):$${tag}; \
+		done
+	@touch "$@"
+
+.build/runtimes/wordpress: .build/var/WORDPRESS_VERSION \
+                           .build/var/REGISTRY \
+                           .build/var/WORDPRESS_TAGS \
+                           .build/runtimes/php \
+                           $(WORDPRESS_RUNTIME_SRCS)
+	$(call print_target, $@)
+	docker build \
+		--build-arg VCS_REF=$(GIT_COMMIT) \
+		--build-arg WORDPRESS_VERSION=$(WORDPRESS_VERSION) \
+		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
+		--tag local$@:$(BUILD_TAG) \
+		--target classic \
+		-f wordpress/Dockerfile wordpress
+	set -e; \
+		for tag in $(WORDPRESS_TAGS); do \
+			docker tag local$@:$(BUILD_TAG) $(WORDPRESS_RUNTIME_REGISTRY):$${tag}; \
+		done
+	@touch "$@"
+
+.build/runtimes/bedrock: .build/runtimes/php \
+                         .build/var/REGISTRY \
+                         $(WORDPRESS_RUNTIME_SRCS)
+	$(call print_target, $@)
+	docker build \
+		--build-arg VCS_REF=$(GIT_COMMIT) \
+		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
+		--tag local$@:$(BUILD_TAG) \
+		--target bedrock \
+		-f wordpress/Dockerfile wordpress
+	set -e; \
+		for tag in $(BEDROCK_TAGS); do \
+			docker tag local$@:$(BUILD_TAG) $(WORDPRESS_RUNTIME_REGISTRY):$${tag}; \
+		done
+	@touch "$@"
+
+.build/runtimes/bedrock-build: .build/runtimes/bedrock
+	$(call print_target, $@)
+	docker build \
+		--build-arg VCS_REF=$(GIT_COMMIT) \
+		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
+		--tag local$@:$(BUILD_TAG) \
+		--target bedrock-build \
+		-f wordpress/Dockerfile wordpress
+	set -e; \
+		for tag in $(BEDROCK_BUILD_TAGS); do \
+			docker tag local$@:$(BUILD_TAG) $(WORDPRESS_RUNTIME_REGISTRY):$${tag}; \
+		done
+	@touch "$@"
