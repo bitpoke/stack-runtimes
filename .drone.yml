@@ -10,9 +10,30 @@ steps:
 - name: build images
   pull: always
   image: quay.io/presslabs/bfc
+  environment:
+    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+    DOCKER_USER: "presslabs+drone"
+    DOCKER_PASSWORD:
+      from_secret: QUAY_TOKEN
   commands:
+    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
     - make pull-cache
     - make images
+    - docker images
+  volumes:
+  - name: dockersock
+    path: /var/run
+
+- name: publish images
+  image: quay.io/presslabs/bfc
+  environment:
+    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+    DOCKER_USER: "presslabs+drone"
+    DOCKER_PASSWORD:
+      from_secret: QUAY_TOKEN
+  commands:
+    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
+    - make push-images
   volumes:
   - name: dockersock
     path: /var/run
