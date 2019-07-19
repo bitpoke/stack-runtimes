@@ -26,12 +26,6 @@ BEDROCK_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(BEDROCK_TAGS))
 BEDROCK_BUILD_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(BEDROCK_BUILD_TAGS))
 endif
 
-IMAGE_NAME := php-runtime
-IMAGE_TAGS := canary
-BUILD_TAG := build
-CONTEXT_DIR ?= $(PWD)
-build_args+= --build-arg PHP_VERSION=$(PHP_VERSION)
-
 define print_target
   @$(call print_notice,Building $@...)
 endef
