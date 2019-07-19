@@ -23,18 +23,32 @@ steps:
   - name: dockersock
     path: /var/run
 
-- name: test
+- name: test php image
   pull: always
   image: quay.io/presslabs/bfc
   environment:
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
   commands:
-    - make test
+    - make .build/test/php
+  volumes:
+  - name: dockersock
+    path: /var/run
+
+- name: test wordpress image
+  pull: always
+  image: quay.io/presslabs/bfc
+  environment:
+    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+  commands:
+    - make .build/test/wordpress
   volumes:
   - name: dockersock
     path: /var/run
 
 - name: publish
+  depends_on:
+    - test php image
+    - test wordpress image
   image: quay.io/presslabs/bfc
   environment:
     TAG_SUFFIX: ${DRONE_BRANCH/master/}

@@ -63,8 +63,7 @@ pull-cache:
 	docker pull $(PHP_RUNTIME_REGISTRY):$(lastword $(PHP_TAGS)) || true
 
 .PHONY: test
-test: images
-	./hack/container-structure-test test --config php/test/config.yaml --image local.build/runtimes/php:$(BUILD_TAG)
+test: .build/test/php .build/test/wordpress
 
 .build/tmp: | .build
 	mkdir -p "$@"
@@ -95,7 +94,6 @@ include var.Makefile
                      | .build/runtimes
 	$(call print_target, $@)
 	docker build \
-		--build-arg VCS_REF=$(GIT_COMMIT) \
 		--build-arg PHP_VERSION=$(PHP_VERSION) \
 		--cache-from $(PHP_RUNTIME_REGISTRY):$(PHP_SERIES) \
 		--cache-from $(PHP_RUNTIME_REGISTRY):$(PHP_VERSION) \
@@ -108,6 +106,9 @@ include var.Makefile
 		done
 	@touch "$@"
 
+.build/test/php: .build/runtimes/php
+	./hack/container-structure-test test --config php/test/config.yaml --image local$<:$(BUILD_TAG)
+
 .build/runtimes/wordpress: .build/var/WORDPRESS_VERSION \
                            .build/var/REGISTRY \
                            .build/var/WORDPRESS_TAGS \
@@ -115,7 +116,6 @@ include var.Makefile
                            $(WORDPRESS_RUNTIME_SRCS)
 	$(call print_target, $@)
 	docker build \
-		--build-arg VCS_REF=$(GIT_COMMIT) \
 		--build-arg WORDPRESS_VERSION=$(WORDPRESS_VERSION) \
 		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
 		--tag local$@:$(BUILD_TAG) \
@@ -127,12 +127,14 @@ include var.Makefile
 		done
 	@touch "$@"
 
+.build/test/wordpress: .build/runtimes/wordpress
+	docker build -t local$@:$(BUILD_TAG) --build-arg BASE_IMAGE=local$<:$(BUILD_TAG) -f wordpress/tests/classic/Dockerfile wordpress/tests/classic
+
 .build/runtimes/bedrock: .build/runtimes/php \
                          .build/var/REGISTRY \
                          $(WORDPRESS_RUNTIME_SRCS)
 	$(call print_target, $@)
 	docker build \
-		--build-arg VCS_REF=$(GIT_COMMIT) \
 		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
 		--tag local$@:$(BUILD_TAG) \
 		--target bedrock \
@@ -146,7 +148,6 @@ include var.Makefile
 .build/runtimes/bedrock-build: .build/runtimes/bedrock
 	$(call print_target, $@)
 	docker build \
-		--build-arg VCS_REF=$(GIT_COMMIT) \
 		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
 		--tag local$@:$(BUILD_TAG) \
 		--target bedrock-build \
