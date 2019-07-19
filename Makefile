@@ -101,7 +101,7 @@ include var.Makefile
 	@touch "$@"
 
 .build/test/php: .build/runtimes/php
-	./hack/container-structure-test test --config php/test/config.yaml --image local$<:$(BUILD_TAG)
+	./hack/container-structure-test test --config php/tests/config.yaml --image local$<:$(BUILD_TAG)
 
 .build/runtimes/wordpress: .build/var/WORDPRESS_VERSION \
                            .build/var/REGISTRY \
