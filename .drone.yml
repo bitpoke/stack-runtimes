@@ -69,6 +69,11 @@ services:
   volumes:
   - name: dockersock
     path: /var/run
+- name: mysql
+  image: percona:5.7
+  environment:
+    MYSQL_ROOT_PASSWORD: not-so-secure
+    MYSQL_DATABASE: wordpress
 
 volumes:
 - name: dockersock
