@@ -24,8 +24,8 @@ steps:
     path: /var/run
 
 - name: test php image
-  pull: always
   image: quay.io/presslabs/bfc
+  depends_on: [build]
   environment:
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
   commands:
@@ -35,8 +35,8 @@ steps:
     path: /var/run
 
 - name: test wordpress image
-  pull: always
   image: quay.io/presslabs/bfc
+  depends_on: [build]
   environment:
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
   commands:

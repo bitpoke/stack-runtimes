@@ -106,8 +106,8 @@ include var.Makefile
 .build/runtimes/wordpress: .build/var/WORDPRESS_VERSION \
                            .build/var/REGISTRY \
                            .build/var/WORDPRESS_TAGS \
-                           .build/runtimes/php \
-                           $(WORDPRESS_RUNTIME_SRCS)
+                           $(WORDPRESS_RUNTIME_SRCS) \
+                           .build/runtimes/php
 	$(call print_target, $@)
 	docker build \
 		--build-arg WORDPRESS_VERSION=$(WORDPRESS_VERSION) \
@@ -124,9 +124,10 @@ include var.Makefile
 .build/test/wordpress: .build/runtimes/wordpress
 	docker build -t local$@:$(BUILD_TAG) --build-arg BASE_IMAGE=local$<:$(BUILD_TAG) -f wordpress/tests/classic/Dockerfile wordpress/tests/classic
 
-.build/runtimes/bedrock: .build/runtimes/php \
-                         .build/var/REGISTRY \
-                         $(WORDPRESS_RUNTIME_SRCS)
+.build/runtimes/bedrock: .build/var/REGISTRY \
+                         $(WORDPRESS_RUNTIME_SRCS) \
+                         .build/runtimes/php
+
 	$(call print_target, $@)
 	docker build \
 		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
