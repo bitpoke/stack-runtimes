@@ -6,6 +6,10 @@ platform:
   os: linux
   arch: amd64
 
+clone:
+  depth: 0
+  tags: true
+
 steps:
 - name: build images
   pull: always
