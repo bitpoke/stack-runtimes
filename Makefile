@@ -107,7 +107,7 @@ include var.Makefile
                            .build/var/REGISTRY \
                            .build/var/WORDPRESS_TAGS \
                            $(WORDPRESS_RUNTIME_SRCS) \
-                           .build/runtimes/php
+                           .build/runtimes/bedrock
 	$(call print_target, $@)
 	docker build \
 		--build-arg WORDPRESS_VERSION=$(WORDPRESS_VERSION) \

@@ -1,9 +1,10 @@
 ARG BASE_IMAGE=quay.io/presslabs/php-runtime:7.3-latest
-FROM ${BASE_IMAGE} as base
+FROM ${BASE_IMAGE} as bedrock
 
 ENV WP_CLI_VERSION=2.2.0
 ENV WP_CLI_CONFIG_PATH=/app/wp-cli.yml
 ENV DOCUMENT_ROOT=/app/web
+ENV MEDIA_BUCKET_PATH=/app/uploads
 USER root
 COPY docker/build-scripts /usr/local/docker/build-scripts/
 RUN set -ex \
@@ -20,18 +21,13 @@ USER www-data
 
 ###############################################################################
 
-FROM base as classic
+FROM bedrock as classic
 ARG WORDPRESS_VERSION=latest
 ENV MEDIA_BUCKET_PATH=/wp-content/uploads
 RUN set -ex \
     && wp core download --path=web/wp --version=${WORDPRESS_VERSION} \
     && cp /usr/local/docker/webroot/* /app/web/
 ONBUILD COPY --chown=www-data:www-data wp-content /app/web/wp-content
-
-###############################################################################
-
-FROM base as bedrock
-ENV MEDIA_BUCKET_PATH=/app/uploads
 
 ###############################################################################
 
