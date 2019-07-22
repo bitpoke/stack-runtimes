@@ -6,7 +6,12 @@ TEST_TMP_DIR=""
 
 docker-compose() {
     local _orig="$(which docker-compose)"
-    cd "$TEST_TMP_DIR" && ${_orig} "$@"
+    if [ -f "${_orig}" ] ; then
+        cd "$TEST_TMP_DIR" && ${_orig} "$@"
+    else
+        echo "Could not find docker-compose." >&2
+        return 1
+    fi
 }
 
 install-wordpress() {
@@ -30,7 +35,7 @@ setup() {
 
 teardown() {
     docker-compose rm -fs
-    rm -rf "$TEST_TMP_DIR"
+    [ -d "$TEST_TMP_DIR" ] && rm -rf "$TEST_TMP_DIR"
 }
 
 @test "serves wordpress on the chosen PORT" {
