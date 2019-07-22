@@ -46,14 +46,13 @@ steps:
   - name: dockersock
     path: /var/run
 
-- name: publish on stage
+- name: publish
   depends_on:
     - test php image
     - test wordpress image
   image: quay.io/presslabs/bfc
   environment:
     <<: *baseEnv
-    TAG_SUFFIX: ${DRONE_COMMIT_SHA:0:7}
     DOCKER_USER: "presslabs+drone"
     DOCKER_PASSWORD:
       from_secret: QUAY_TOKEN
