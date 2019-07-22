@@ -59,12 +59,21 @@ endef
 .PHONY: images
 images: php-runtime wordpress-runtime bedrock-runtime
 
-.PHONY: push-images
-push-images: images
+.PHONY: push-php-images
+push-php-images: php-runtime
 	for tag in $(PHP_TAGS); do \
 		docker push $(PHP_RUNTIME_REGISTRY):$${tag}; \
 	done
-	for tag in $(WORDPRESS_TAGS) $(BEDROCK_TAGS) $(BEDROCK_BUILD_TAGS); do \
+
+.PHONY: push-wordpress-images
+push-wordpress-images: wordpress-runtime
+	for tag in $(WORDPRESS_TAGS); do \
+		docker push $(WORDPRESS_RUNTIME_REGISTRY):$${tag}; \
+	done
+
+.PHONY: push-bedrock-images
+push-bedrock-images: bedrock-runtime
+	for tag in $(BEDROCK_TAGS) $(BEDROCK_BUILD_TAGS); do \
 		docker push $(WORDPRESS_RUNTIME_REGISTRY):$${tag}; \
 	done
 
