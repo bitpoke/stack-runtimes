@@ -1,0 +1,18 @@
+version: '3'
+services:
+  wordpress:
+    image: "${TEST_IMAGE}"
+    environment:
+      - PORT=${TEST_PORT}
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=not-so-secure
+      - DB_NAME=wordpress_test
+    ports:
+      - "${TEST_PORT}:${TEST_PORT}"
+  mysql:
+    image: percona:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=not-so-secure
+      - MYSQL_DATABASE=wordpress_test
+
