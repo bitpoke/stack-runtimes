@@ -11,7 +11,7 @@ clone:
   tags: true
 
 steps:
-- name: build
+- name: prime caches
   pull: always
   image: quay.io/presslabs/bfc
   environment: &baseEnv
@@ -19,6 +19,18 @@ steps:
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
   commands:
     - make pull-cache
+    - docker pull percona:5.7
+  volumes:
+  - name: dockersock
+    path: /var/run
+
+- name: build
+  image: quay.io/presslabs/bfc
+  depends_on: [prime caches]
+  environment: &baseEnv
+    PHP_VERSION: 7.3.7
+    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+  commands:
     - make images
   volumes:
   - name: dockersock
@@ -70,11 +82,6 @@ services:
   volumes:
   - name: dockersock
     path: /var/run
-- name: mysql
-  image: percona:5.7
-  environment:
-    MYSQL_ROOT_PASSWORD: not-so-secure
-    MYSQL_DATABASE: wordpress
 
 volumes:
 - name: dockersock
