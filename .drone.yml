@@ -11,13 +11,15 @@ clone:
   tags: true
 
 steps:
-- name: prime caches
+- name: setup docker
   pull: always
   image: quay.io/presslabs/bfc
   environment: &baseEnv
     PHP_VERSION: 7.3.7
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
   commands:
+    - dockerize -wait unix:///var/run/docker.sock -timeout 10s
+    - docker info
     - make pull-cache
     - docker pull percona:5.7
   volumes:
@@ -26,7 +28,7 @@ steps:
 
 - name: build
   image: quay.io/presslabs/bfc
-  depends_on: [prime caches]
+  depends_on: [setup docker]
   environment: &baseEnv
     PHP_VERSION: 7.3.7
     TAG_SUFFIX: ${DRONE_BRANCH/master/}

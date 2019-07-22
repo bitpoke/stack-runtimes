@@ -8,10 +8,13 @@ services:
       - DB_USER=root
       - DB_PASSWORD=not-so-secure
       - DB_NAME=wordpress_test
-      - WP_HOME="http://${TEST_HOSTNAME}:${TEST_PORT}"
-      - WP_SITEURL="http://${TEST_HOSTNAME}:${TEST_PORT}/wp"
+      - WP_HOME=http://${TEST_HOSTNAME}:${TEST_PORT}
+      - WP_SITEURL=http://${TEST_HOSTNAME}:${TEST_PORT}/wp
+      - NGINX_ACCESS_LOG=/dev/stdout
     ports:
       - "${TEST_PORT}:${TEST_PORT}"
+    extra_hosts:
+      - "${TEST_HOSTNAME}:127.0.0.1"
   mysql:
     image: percona:5.7
     # network_mode: "service:wordpress"

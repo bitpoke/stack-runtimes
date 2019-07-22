@@ -123,8 +123,8 @@ include var.Makefile
 
 .build/test/wordpress: .build/runtimes/wordpress
 	docker build -t local$@:$(BUILD_TAG) --build-arg BASE_IMAGE=local$<:$(BUILD_TAG) -f wordpress/tests/classic/Dockerfile wordpress/tests/classic
-	./hack/container-structure-test test --config wordpress/tests/classic/config.yaml --image local$@:$(BUILD_TAG)
-	TEST_IMAGE="local$@:$(BUILD_TAG)" ./hack/bats/bin/bats wordpress/tests/classic/e2e.bats
+	./hack/container-structure-test test --config wordpress/tests/structure-tests.yaml --image local$@:$(BUILD_TAG)
+	TEST_IMAGE="local$@:$(BUILD_TAG)" ./hack/bats/bin/bats wordpress/tests/e2e.bats
 
 .build/runtimes/bedrock: .build/var/REGISTRY \
                          $(WORDPRESS_RUNTIME_SRCS) \
@@ -160,6 +160,6 @@ include var.Makefile
 		--build-arg RUNTIME_IMAGE=local$<:$(BUILD_TAG) \
 		--build-arg BUILD_IMAGE=local$<-build:$(BUILD_TAG) \
 		-f wordpress/tests/bedrock/Dockerfile wordpress/tests/bedrock
-	./hack/container-structure-test test --config wordpress/tests/bedrock/config.yaml --image local$@:$(BUILD_TAG)
-	TEST_IMAGE="local$@:$(BUILD_TAG)" ./hack/bats/bin/bats wordpress/tests/bedrock/e2e.bats
+	./hack/container-structure-test test --config wordpress/tests/structure-tests.yaml --image local$@:$(BUILD_TAG)
+	TEST_IMAGE="local$@:$(BUILD_TAG)" ./hack/bats/bin/bats wordpress/tests/e2e.bats
 
