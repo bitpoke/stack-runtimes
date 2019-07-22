@@ -59,10 +59,23 @@ steps:
   - name: dockersock
     path: /var/run
 
+- name: test bedrock image
+  image: quay.io/presslabs/bfc
+  depends_on: [build]
+  environment:
+    <<: *baseEnv
+    TEST_HOSTNAME: docker
+  commands:
+    - make .build/test/bedrock
+  volumes:
+  - name: dockersock
+    path: /var/run
+
 - name: publish
   depends_on:
     - test php image
     - test wordpress image
+    - test bedrock image
   image: quay.io/presslabs/bfc
   environment:
     <<: *baseEnv

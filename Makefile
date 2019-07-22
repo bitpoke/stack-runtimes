@@ -154,3 +154,12 @@ include var.Makefile
 			docker tag local$@:$(BUILD_TAG) $(WORDPRESS_RUNTIME_REGISTRY):$${tag}; \
 		done
 	@touch "$@"
+
+.build/test/bedrock: .build/runtimes/bedrock
+	docker build -t local$@:$(BUILD_TAG) \
+		--build-arg RUNTIME_IMAGE=local$<:$(BUILD_TAG) \
+		--build-arg BUILD_IMAGE=local$<-build:$(BUILD_TAG) \
+		-f wordpress/tests/bedrock/Dockerfile wordpress/tests/bedrock
+	./hack/container-structure-test test --config wordpress/tests/bedrock/config.yaml --image local$@:$(BUILD_TAG)
+	TEST_IMAGE="local$@:$(BUILD_TAG)" ./hack/bats/bin/bats wordpress/tests/bedrock/e2e.bats
+
