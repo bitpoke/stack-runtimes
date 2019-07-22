@@ -1,5 +1,5 @@
 ARG PHP_VERSION=7.3.7
-FROM php:${PHP_VERSION}-fpm-stretch as php
+FROM php:${PHP_VERSION}-fpm-buster as php
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV PATH="/usr/local/docker/bin:${PATH}"
 ENV PHP_VERSION=${PHP_VERSION}
@@ -24,13 +24,13 @@ ENV COMPOSER_NO_INTERACTION=1
 # install openresty and minimal requirements
 RUN set -ex \
     && apt-get update \
-    && apt-get install --no-install-recommends -y gnupg=2.1* \
+    && apt-get install --no-install-recommends -y gnupg \
     && curl -s https://openresty.org/package/pubkey.gpg | apt-key add - \
     && echo "deb http://openresty.org/package/debian stretch openresty" > /etc/apt/sources.list.d/openresty.list \
     && apt-get update \
     && apt-get install --no-install-recommends -y \
-        ssmtp=2.64* unzip=6.0* openresty=1.13* libyaml-0-2=0.1* libyaml-dev=0.1* \
-        less=481* git=1:2.11* openssh-client=1:7.4* procps \
+        msmtp unzip openresty=1.13* libyaml-0-2 libyaml-dev \
+        less git openssh-client procps \
     # we need yaml support for installing extensions
     && pecl install yaml \
     && docker-php-ext-enable --ini-name 50-docker-php-ext-yaml.ini yaml \
@@ -76,5 +76,5 @@ COPY --chown=www-data:www-data ./nginx-lua /usr/local/docker/lib/nginx/lua/
 USER www-data:www-data
 
 EXPOSE 8080
-ENTRYPOINT ["/usr/local/docker/bin/docker-php-entrypoint"]
+ENTRYPOINT ["/usr/local/docker/bin/docker-entrypoint"]
 CMD ["supervisord", "-c", "/usr/local/docker/etc/supervisor.conf"]

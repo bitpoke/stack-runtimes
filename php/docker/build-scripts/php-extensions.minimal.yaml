@@ -3,12 +3,10 @@
 - name: "gd"
   build:
     args:
-      - "--with-freetype-dir=/usr/include/"
       - "--with-jpeg-dir=/usr/include/"
       - "--with-png-dir=/usr/include/"
       - "--with-webp-dir=/usr/include/"
     depends:
-      - libfreetype6-dev
       - libjpeg62-turbo-dev
       - libpng-dev
       - libwebp-dev
@@ -17,6 +15,7 @@
     depends:
       - "libc-client-dev"
       - "libkrb5-dev"
+      - "libssl-dev"
     args:
       - "--with-kerberos"
       - "--with-imap-ssl"

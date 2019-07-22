@@ -16,6 +16,22 @@ commandTests:
     args: ["openresty"]
     expectedOutput: ["/usr/bin/openresty\n"]
 
+  - name: validate default openresty config
+    setup:
+      - ["/usr/local/docker/bin/docker-entrypoint", "/bin/true"]
+      - ["mkdir", "-p", "/var/www/.config/gcloud/"]
+      - ["/bin/bash", "-c", "echo {} > /var/www/.config/gcloud/google_application_credentials.json"]
+    command: "/usr/bin/openresty"
+    args: ["-t", "-p", "/var/lib/nginx", "-g", "daemon off;", "-c", "/usr/local/docker/etc/nginx.conf"]
+    exitCode: 0
+
+  - name: validate default php-fpm config
+    setup:
+      - ["/usr/local/docker/bin/docker-entrypoint", "/bin/true"]
+    command: "/usr/local/sbin/php-fpm"
+    args: ["-t", "-y", "/usr/local/docker/etc/php-fpm.conf"]
+    exitCode: 0
+
 fileExistenceTests:
 - &www-data
   name: 'app'
