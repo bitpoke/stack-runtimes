@@ -52,6 +52,7 @@ steps:
   depends_on: [build]
   environment:
     <<: *baseEnv
+    TEST_HOSTNAME: docker
   commands:
     - make .build/test/wordpress
   volumes:

@@ -12,6 +12,7 @@ services:
       - "${TEST_PORT}:${TEST_PORT}"
   mysql:
     image: percona:5.7
+    # network_mode: "service:wordpress"
     environment:
       - MYSQL_ROOT_PASSWORD=not-so-secure
       - MYSQL_DATABASE=wordpress_test
