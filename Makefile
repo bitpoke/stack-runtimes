@@ -11,7 +11,7 @@ BUILD_TAG ?= build
 WORDPRESS_PHP_SERIES := $(shell ./hack/wordpress-php-series $(WORDPRESS_VERSION))
 
 # The PHP series for which to build the default bedrock tag
-BEDROCK_PHP_SERIES := 7.2
+BEDROCK_PHP_SERIES := 7.3
 
 GIT_COMMIT = $(shell git describe --always --abbrev=40 --dirty)
 
@@ -139,6 +139,7 @@ include var.Makefile
 	docker build \
 		--build-arg WORDPRESS_VERSION=$(WORDPRESS_VERSION) \
 		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
+		--cache-from $(WORDPRESS_RUNTIME_REGISTRY):$(WORDPRESS_VERSION) \
 		--tag local$@:$(BUILD_TAG) \
 		--target classic \
 		-f wordpress/Dockerfile wordpress
@@ -157,10 +158,10 @@ include var.Makefile
                          .build/var/BEDROCK_TAGS \
                          $(WORDPRESS_RUNTIME_SRCS) \
                          .build/runtimes/php
-
 	$(call print_target, $@)
 	docker build \
 		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
+		--cache-from $(WORDPRESS_RUNTIME_REGISTRY):bedrock-php-$(PHP_SERIES) \
 		--tag local$@:$(BUILD_TAG) \
 		--target bedrock \
 		-f wordpress/Dockerfile wordpress
@@ -176,6 +177,7 @@ include var.Makefile
 	$(call print_target, $@)
 	docker build \
 		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
+		--cache-from $(WORDPRESS_RUNTIME_REGISTRY):bedrock-build-php-$(PHP_SERIES) \
 		--tag local$@:$(BUILD_TAG) \
 		--target bedrock-build \
 		-f wordpress/Dockerfile wordpress
