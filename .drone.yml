@@ -16,6 +16,7 @@ steps:
   image: quay.io/presslabs/bfc
   environment: &baseEnv
     PHP_VERSION: 7.3.7
+    WORDPRESS_VERSION: 5.2.2
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
   commands:
     - dockerize -wait unix:///var/run/docker.sock -timeout 10s

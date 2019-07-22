@@ -1,12 +1,19 @@
 REGISTRY ?= quay.io/presslabs
 PHP_VERSION ?= 7.3.7
 WORDPRESS_VERSION ?= 5.2.2
-BUILD_TAG ?= build
+
 ifndef CI
 TAG_SUFFIX ?= canary
 endif
+BUILD_TAG ?= build
 
-GIT_COMMIT ?= $(shell git describe --always --abbrev=40 --dirty)
+# The PHP series for which this version of WordPress builds the default tag, eg. quay.io/presslabs/wordpress-runtime:5.2.2
+WORDPRESS_PHP_SERIES := $(shell ./hack/wordpress-php-series $(WORDPRESS_VERSION))
+
+# The PHP series for which to build the default bedrock tag
+BEDROCK_PHP_SERIES := 7.2
+
+GIT_COMMIT = $(shell git describe --always --abbrev=40 --dirty)
 
 PHP_RUNTIME_REGISTRY := $(REGISTRY)/php-runtime
 PHP_RUNTIME_SRCS := $(shell find php -type f)
@@ -15,15 +22,26 @@ PHP_TAGS := $(PHP_SERIES) $(PHP_VERSION)
 
 WORDPRESS_RUNTIME_REGISTRY := $(REGISTRY)/wordpress-runtime
 WORDPRESS_RUNTIME_SRCS := $(shell find wordpress -type f)
-WORDPRESS_TAGS := $(WORDPRESS_VERSION) $(patsubst %,$(WORDPRESS_VERSION)-php-%,$(PHP_TAGS))
-BEDROCK_TAGS := bedrock $(patsubst %,bedrock-php-%,$(PHP_TAGS))
-BEDROCK_BUILD_TAGS := bedrock-build $(patsubst %,bedrock-build-php-%,$(PHP_TAGS))
+
+
+ifeq ($(WORDPRESS_PHP_SERIES), $(PHP_SERIES))
+WORDPRESS_TAGS := $(WORDPRESS_VERSION)
+endif
+
+ifeq ($(BEDROCK_PHP_SERIES), $(PHP_SERIES))
+BEDROCK_TAGS := bedrock
+BEDROCK_BUILD_TAGS := bedrock-build
+endif
+
+WORDPRESS_TAGS += $(patsubst %,$(WORDPRESS_VERSION)-php-%,$(PHP_TAGS))
+BEDROCK_TAGS += $(patsubst %,bedrock-php-%,$(PHP_TAGS))
+BEDROCK_BUILD_TAGS += $(patsubst %,bedrock-build-php-%,$(PHP_TAGS))
 
 ifdef TAG_SUFFIX
-PHP_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(PHP_TAGS))
 WORDPRESS_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(WORDPRESS_TAGS))
 BEDROCK_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(BEDROCK_TAGS))
 BEDROCK_BUILD_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(BEDROCK_BUILD_TAGS))
+PHP_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(PHP_TAGS))
 endif
 
 define print_target
@@ -82,7 +100,7 @@ include var.Makefile
 
 .build/runtimes/php: .build/var/PHP_VERSION \
                      .build/var/PHP_SERIES \
-                     .build/var/REGISTRY \
+                     .build/var/PHP_RUNTIME_REGISTRY \
                      .build/var/PHP_TAGS \
                      $(PHP_RUNTIME_SRCS) \
                      | .build/runtimes
@@ -104,7 +122,7 @@ include var.Makefile
 	./hack/container-structure-test test --config php/tests/config.yaml --image local$<:$(BUILD_TAG)
 
 .build/runtimes/wordpress: .build/var/WORDPRESS_VERSION \
-                           .build/var/REGISTRY \
+                           .build/var/WORDPRESS_RUNTIME_REGISTRY \
                            .build/var/WORDPRESS_TAGS \
                            $(WORDPRESS_RUNTIME_SRCS) \
                            .build/runtimes/bedrock
@@ -126,7 +144,8 @@ include var.Makefile
 	./hack/container-structure-test test --config wordpress/tests/structure-tests.yaml --image local$@:$(BUILD_TAG)
 	TEST_IMAGE="local$@:$(BUILD_TAG)" ./hack/bats/bin/bats wordpress/tests/e2e.bats
 
-.build/runtimes/bedrock: .build/var/REGISTRY \
+.build/runtimes/bedrock: .build/var/WORDPRESS_RUNTIME_REGISTRY \
+                         .build/var/BEDROCK_TAGS \
                          $(WORDPRESS_RUNTIME_SRCS) \
                          .build/runtimes/php
 
@@ -142,7 +161,9 @@ include var.Makefile
 		done
 	@touch "$@"
 
-.build/runtimes/bedrock-build: .build/runtimes/bedrock
+.build/runtimes/bedrock-build: .build/var/WORDPRESS_RUNTIME_REGISTRY \
+                               .build/var/BEDROCK_BUILD_TAGS \
+                               .build/runtimes/bedrock
 	$(call print_target, $@)
 	docker build \
 		--build-arg BASE_IMAGE=local.build/runtimes/php:$(BUILD_TAG) \
