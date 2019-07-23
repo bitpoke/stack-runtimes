@@ -1,3 +1,5 @@
+include common.Makefile
+
 REGISTRY ?= quay.io/presslabs
 PHP_VERSION ?= 7.3.7
 WORDPRESS_VERSION ?= 5.2.2
@@ -44,18 +46,6 @@ BEDROCK_BUILD_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(BEDROCK_BUILD_TAGS))
 PHP_TAGS := $(patsubst %,%-$(TAG_SUFFIX),$(PHP_TAGS))
 endif
 
-define print_target
-  @$(call print_notice,Building $@...)
-endef
-
-define print_notice
-  printf "\n\033[93m\033[1m$(1)\033[0m\n"
-endef
-
-define print_error
-  printf "\n\033[93m\033[1m$(1)\033[0m\n"
-endef
-
 .PHONY: images
 images: php-runtime wordpress-runtime bedrock-runtime
 
@@ -86,13 +76,6 @@ pull-cache:
 .PHONY: test
 test: .build/test/php .build/test/wordpress
 
-.build/tmp: | .build
-	mkdir -p "$@"
-
-.PHONY: clean
-clean::
-	rm -Rf .build
-
 .PHONY: php-runtime
 php-runtime: .build/runtimes/php
 
@@ -101,8 +84,6 @@ wordpress-runtime: .build/runtimes/wordpress
 
 .PHONY: bedrock-runtime
 bedrock-runtime: .build/runtimes/bedrock .build/runtimes/bedrock-build
-
-include var.Makefile
 
 .build/runtimes: | .build
 	mkdir -p "$@"

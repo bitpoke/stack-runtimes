@@ -1,7 +1,0 @@
-version: '3'
-services:
-  php:
-    image: quay.io/presslabs/php-runtime:7.1.20-canary
-    volumes:
-      - ./docker-compose/html:/var/www/html:ro
-    restart: on-failure

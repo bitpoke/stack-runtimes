@@ -1,45 +1,37 @@
 ---
 kind: pipeline
-name: php-7.3
+name: php-runtime-7.3
 
 steps:
-- name: setup docker
+- &step
+  name: setup docker
   pull: always
   image: quay.io/presslabs/bfc
   environment: &baseEnv
-    PHP_VERSION: 7.3.7
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
   commands:
     - dockerize -wait unix:///var/run/docker.sock -timeout 10s
     - docker info
-    - make pull-cache
+    - make -C php pull-$DRONE_STAGE_NAME
   volumes:
   - name: dockersock
     path: /var/run
 
-- name: build image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+- <<: *step
+  name: build image
+  pull: default
   commands:
-    - make php-runtime
-  volumes:
-  - name: dockersock
-    path: /var/run
+    - make -C php $DRONE_STAGE_NAME
 
-- name: test image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
+- <<: *step
+  name: test image
+  pull: default
   commands:
-    - make .build/test/php
-  volumes:
-  - name: dockersock
-    path: /var/run
+    - make -C php test-$DRONE_STAGE_NAME
 
-- name: publish
-  image: quay.io/presslabs/bfc
+- <<: *step
+  name: publish
+  pull: default
   environment:
     <<: *baseEnv
     DOCKER_USER: "presslabs+drone"
@@ -47,10 +39,7 @@ steps:
       from_secret: QUAY_TOKEN
   commands:
     - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
-    - make push-php-images
-  volumes:
-  - name: dockersock
-    path: /var/run
+    - make -C php push-$DRONE_STAGE_NAME
 
 services:
 - name: docker
@@ -63,49 +52,41 @@ services:
 volumes:
 - name: dockersock
   temp: {}
-
 ---
 kind: pipeline
-name: php-7.2
+name: php-runtime-7.2
 
 steps:
-- name: setup docker
+- &step
+  name: setup docker
   pull: always
   image: quay.io/presslabs/bfc
   environment: &baseEnv
-    PHP_VERSION: 7.2.20
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
   commands:
     - dockerize -wait unix:///var/run/docker.sock -timeout 10s
+    - env
     - docker info
-    - make pull-cache
+    - make -C php pull-$DRONE_STAGE_NAME
   volumes:
   - name: dockersock
     path: /var/run
 
-- name: build image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+- <<: *step
+  name: build image
+  pull: default
   commands:
-    - make php-runtime
-  volumes:
-  - name: dockersock
-    path: /var/run
+    - make -C php $DRONE_STAGE_NAME
 
-- name: test image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
+- <<: *step
+  name: test image
+  pull: default
   commands:
-    - make .build/test/php
-  volumes:
-  - name: dockersock
-    path: /var/run
+    - make -C php test-$DRONE_STAGE_NAME
 
-- name: publish
-  image: quay.io/presslabs/bfc
+- <<: *step
+  name: publish
+  pull: default
   environment:
     <<: *baseEnv
     DOCKER_USER: "presslabs+drone"
@@ -113,10 +94,7 @@ steps:
       from_secret: QUAY_TOKEN
   commands:
     - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
-    - make push-php-images
-  volumes:
-  - name: dockersock
-    path: /var/run
+    - make -C php push-$DRONE_STAGE_NAME
 
 services:
 - name: docker
@@ -130,289 +108,3 @@ volumes:
 - name: dockersock
   temp: {}
 
----
-kind: pipeline
-name: wordpress-5.2
-
-steps:
-- name: setup docker
-  pull: always
-  image: quay.io/presslabs/bfc
-  environment: &baseEnv
-    PHP_VERSION: 7.3.7
-    WORDPRESS_VERSION: 5.2.2
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-  commands:
-    - dockerize -wait unix:///var/run/docker.sock -timeout 10s
-    - docker info
-    - make pull-cache
-    - docker pull quay.io/presslabs/wordpress-runtime:$WORDPRESS_VERSION || true
-    - docker pull percona:5.7
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: build image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-  commands:
-    - make wordpress-runtime
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: test image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TEST_HOSTNAME: docker
-  commands:
-    - make .build/test/wordpress
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: publish
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    DOCKER_USER: "presslabs+drone"
-    DOCKER_PASSWORD:
-      from_secret: QUAY_TOKEN
-  commands:
-    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
-    - make push-wordpress-images
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-services:
-- name: docker
-  image: docker:dind
-  privileged: true
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-volumes:
-- name: dockersock
-  temp: {}
-
-depends_on:
-  - php-7.3
----
-kind: pipeline
-name: wordpress-5.1
-
-steps:
-- name: setup docker
-  pull: always
-  image: quay.io/presslabs/bfc
-  environment: &baseEnv
-    PHP_VERSION: 7.2.20
-    WORDPRESS_VERSION: 5.1.1
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-  commands:
-    - dockerize -wait unix:///var/run/docker.sock -timeout 10s
-    - docker info
-    - make pull-cache
-    - docker pull quay.io/presslabs/wordpress-runtime:$WORDPRESS_VERSION || true
-    - docker pull percona:5.7
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: build image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-  commands:
-    - make wordpress-runtime
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: test image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TEST_HOSTNAME: docker
-  commands:
-    - make .build/test/wordpress
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: publish
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    DOCKER_USER: "presslabs+drone"
-    DOCKER_PASSWORD:
-      from_secret: QUAY_TOKEN
-  commands:
-    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
-    - make push-wordpress-images
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-services:
-- name: docker
-  image: docker:dind
-  privileged: true
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-volumes:
-- name: dockersock
-  temp: {}
-
-depends_on:
-  - php-7.2
----
-kind: pipeline
-name: bedrock-php-7.3
-
-steps:
-- name: setup docker
-  pull: always
-  image: quay.io/presslabs/bfc
-  environment: &baseEnv
-    PHP_VERSION: 7.3.7
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-  commands:
-    - dockerize -wait unix:///var/run/docker.sock -timeout 10s
-    - docker info
-    - make pull-cache
-    - docker pull quay.io/presslabs/wordpress-runtime:bedrock-php-7.3 || true
-    - docker pull percona:5.7
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: build image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-  commands:
-    - make bedrock-runtime
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: test image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TEST_HOSTNAME: docker
-  commands:
-    - make .build/test/bedrock
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: publish
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    DOCKER_USER: "presslabs+drone"
-    DOCKER_PASSWORD:
-      from_secret: QUAY_TOKEN
-  commands:
-    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
-    - make push-bedrock-images
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-services:
-- name: docker
-  image: docker:dind
-  privileged: true
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-volumes:
-- name: dockersock
-  temp: {}
-
-depends_on:
-  - php-7.3
----
-kind: pipeline
-name: bedrock-php-7.2
-
-steps:
-- name: setup docker
-  pull: always
-  image: quay.io/presslabs/bfc
-  environment: &baseEnv
-    PHP_VERSION: 7.2.20
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-  commands:
-    - dockerize -wait unix:///var/run/docker.sock -timeout 10s
-    - docker info
-    - make pull-cache
-    - docker pull quay.io/presslabs/wordpress-runtime:bedrock-php-7.2 || true
-    - docker pull percona:5.7
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: build image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-  commands:
-    - make bedrock-runtime
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: test image
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    TEST_HOSTNAME: docker
-  commands:
-    - make .build/test/bedrock
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-- name: publish
-  image: quay.io/presslabs/bfc
-  environment:
-    <<: *baseEnv
-    DOCKER_USER: "presslabs+drone"
-    DOCKER_PASSWORD:
-      from_secret: QUAY_TOKEN
-  commands:
-    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
-    - make push-bedrock-images
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-services:
-- name: docker
-  image: docker:dind
-  privileged: true
-  volumes:
-  - name: dockersock
-    path: /var/run
-
-volumes:
-- name: dockersock
-  temp: {}
-
-depends_on:
-  - php-7.2
