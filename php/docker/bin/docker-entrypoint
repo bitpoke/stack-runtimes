@@ -16,6 +16,9 @@ set -e
 set -o pipefail
 
 dockerize -template /usr/local/docker/templates:/usr/local/docker/etc -no-overwrite
+if [ -f /usr/local/docker/etc/msmtp.conf ] ; then
+    chmod 0600 /usr/local/docker/etc/msmtp.conf
+fi
 
 if [ -d /usr/local/docker/entrypoint.d ] ; then
     run-parts --exit-on-error /usr/local/docker/entrypoint.d
