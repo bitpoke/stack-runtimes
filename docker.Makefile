@@ -36,7 +36,7 @@ test-$(RUNTIME)-%: .build/test-$(RUNTIME)-% ;
 $(call build_targets_for, pull-$(RUNTIME)):
 pull-cache: $(call build_targets_for, pull-$(RUNTIME))
 pull-$(RUNTIME)-%:
-	docker pull $(REGISTRY):$(@:pull-$(RUNTIME)-%=%)$(TAG_SUFFIX_SLUG)
+	docker pull $(REGISTRY):$(@:pull-$(RUNTIME)-%=%)$(TAG_SUFFIX_SLUG) || true
 
 .PHONY: tags
 $(call build_targets_for, tag-$(RUNTIME)):
@@ -65,7 +65,7 @@ push-$(RUNTIME)-%: .build/tag-$(RUNTIME)-%
 
 .PRECIOUS: .build/tag-$(RUNTIME)-%
 .build/tag-$(RUNTIME)-%: .build/$(RUNTIME)-% $(TAG_SUFFIX_DEP)
-	@TAG_SUFFIX="$(TAG_SUFFIX)" ./tag.sh $(@:.build/tag-$(RUNTIME)-%=%) local$(@:.build/tag-$(RUNTIME)-%=.build/$(RUNTIME)-%) > $@
+	@TAG_SUFFIX="$(TAG_SUFFIX)" ./tag.sh $(@:.build/tag-$(RUNTIME)-%=%) local$(@:.build/tag-$(RUNTIME)-%=.build/$(RUNTIME)-%) | sort | uniq > $@
 	@for tag in $$(cat $@); do \
 		echo docker tag local$(@:.build/tag-$(RUNTIME)-%=.build/$(RUNTIME)-%) $(REGISTRY):$${tag} ; \
 		docker tag local$(@:.build/tag-$(RUNTIME)-%=.build/$(RUNTIME)-%) $(REGISTRY):$${tag} ; \

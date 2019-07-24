@@ -1,5 +1,4 @@
-ARG BASE_IMAGE=quay.io/presslabs/php-runtime:7.3-latest
-FROM ${BASE_IMAGE} as bedrock
+FROM quay.io/presslabs/php-runtime:7.2 as bedrock
 
 ENV WP_CLI_VERSION=2.2.0
 ENV WP_CLI_CONFIG_PATH=/app/wp-cli.yml
@@ -21,24 +20,10 @@ USER www-data
 
 ###############################################################################
 
-FROM bedrock as classic
-ARG WORDPRESS_VERSION=latest
+FROM bedrock
+ENV WORDPRESS_VERSION=5.1.1
 ENV MEDIA_BUCKET_PATH=/wp-content/uploads
 RUN set -ex \
     && wp core download --path=web/wp --version=${WORDPRESS_VERSION} \
     && cp /usr/local/docker/webroot/* /app/web/
 ONBUILD COPY --chown=www-data:www-data wp-content /app/web/wp-content
-
-###############################################################################
-
-FROM bedrock as bedrock-build
-
-WORKDIR /src
-# Install project dependencies as first build step for child images so that we
-# heat up composer cache
-ONBUILD COPY --chown=www-data:www-data composer.json composer.lock /src/
-ONBUILD RUN composer install --no-dev --no-interaction --no-progress --no-ansi --no-scripts
-
-ONBUILD COPY --chown=www-data:www-data . /src
-ONBUILD RUN composer install --no-dev --no-interaction --no-progress --no-ansi --no-scripts
-ONBUILD RUN cp -a /src/. /app
