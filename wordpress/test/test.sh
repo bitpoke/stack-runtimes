@@ -28,12 +28,27 @@ export PROJECT_ROOT=$(dirname "${BASH_SOURCE}")/../..
 cd "${PROJECT_ROOT}"
 
 TEST_IMAGE="${IMAGE}-test"
+
 TEST_CONTEXT="wordpress/test/classic"
+
+RUNTIME_IMAGE="${IMAGE}"
+BUILDER_IMAGE="${IMAGE/bedrock/bedrock-build}"
+
+if [[ $IMAGE == *"bedrock"* ]] ; then
+    TEST_CONTEXT="wordpress/test/bedrock"
+    if [[ $IMAGE == *"bedrock-build"* ]] ; then
+        RUNTIME_IMAGE="${IMAGE/bedrock-build/bedrock}"
+        BUILDER_IMAGE="${IMAGE}"
+    fi
+fi
 
 export TEST_IMAGE
 
 set -x
 
-docker build -t "${TEST_IMAGE}" --build-arg "BASE_IMAGE=${IMAGE}" -f "${TEST_CONTEXT}/Dockerfile" "${TEST_CONTEXT}"
+docker build -t "${TEST_IMAGE}" \
+    --build-arg "BUILDER_IMAGE=${BUILDER_IMAGE}" \
+    --build-arg "RUNTIME_IMAGE=${RUNTIME_IMAGE}" \
+    -f "${TEST_CONTEXT}/Dockerfile" "${TEST_CONTEXT}"
 hack/container-structure-test test --config wordpress/test/container-structure-test.yaml --image "$TEST_IMAGE"
 hack/bats/bin/bats wordpress/test/e2e.bats

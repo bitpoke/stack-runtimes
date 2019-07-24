@@ -22,6 +22,8 @@ define build_targets_for
 $(patsubst Dockerfile-%,$(1)-%,$(DOCKERFILES))
 endef
 
+DOCKER_BUILD := docker build --pull
+
 .PHONY: images
 $(call build_targets_for, $(RUNTIME)):
 images: $(call build_targets_for, $(RUNTIME))
@@ -54,7 +56,8 @@ push-$(RUNTIME)-%: .build/tag-$(RUNTIME)-%
 
 .PRECIOUS: .build/$(RUNTIME)-%
 .build/$(RUNTIME)-%: Dockerfile-% $(SRCS) | .build
-	docker build --pull -t local$@ \
+	$(DOCKER_BUILD) $(patsubst %,--build-arg BASE_IMAGE=%,$(BASE_IMAGE)) \
+		-t local$@ \
 		--cache-from $(REGISTRY):$(@:.build/$(RUNTIME)-%=%) \
 		--cache-from $(REGISTRY):$(@:.build/$(RUNTIME)-%=%)$(TAG_SUFFIX_SLUG) \
 		-f $(@:.build/$(RUNTIME)-%=Dockerfile-%) .

@@ -1,2 +1,2 @@
-ARG BASE_IMAGE=local.build/runtimes/wordpress:build
-FROM ${BASE_IMAGE}
+ARG BUILDER_IMAGE
+FROM ${BUILDER_IMAGE}

@@ -1,0 +1,11 @@
+ARG BASE_IMAGE=quay.io/presslabs/wordpress-runtime:bedrock-php-7.2
+FROM ${BASE_IMAGE} as bedrock
+WORKDIR /src
+# Install project dependencies as first build step for child images so that we
+# heat up composer cache
+ONBUILD COPY --chown=www-data:www-data composer.json composer.lock /src/
+ONBUILD RUN composer install --no-dev --no-interaction --no-progress --no-ansi --no-scripts
+
+ONBUILD COPY --chown=www-data:www-data . /src
+ONBUILD RUN composer install --no-dev --no-interaction --no-progress --no-ansi --no-scripts
+ONBUILD RUN cp -a /src/. /app
