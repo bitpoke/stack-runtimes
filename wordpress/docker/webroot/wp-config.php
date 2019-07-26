@@ -71,8 +71,10 @@ define( 'NONCE_SALT',       getenv( 'NONCE_SALT' ) ?: 'put your unique phrase he
  */
 $table_prefix = getenv('DB_PREFIX') ?: 'wp_';
 
-define( 'WP_HOME', getenv( 'WP_HOME' ) ?: '' );
-define( 'WP_SITEURL', getenv( 'WP_SITEURL' ) ?: '' );
+define( 'WP_HOME', getenv( 'WP_HOME' ) ?: $_SERVER['HTTP_HOST'] );
+define( 'WP_SITEURL', getenv( 'WP_SITEURL' ) ?: $_SERVER['HTTP_HOST'] . '/wp' );
+define( 'WP_CONTENT_DIR', __DIR__ . '/wp-content' );
+define( 'WP_CONTENT_URL', WP_HOME . '/wp-content' );
 
 /**
  * Allow WordPress to detect HTTPS when used behind a reverse proxy or a load balancer
@@ -82,10 +84,10 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
     $_SERVER['HTTPS'] = 'on';
 }
 
-$env_config = dirname( __DIR__ ) . '/config/environments/' . WP_ENV . '.php';
+$user_config = dirname( __DIR__ ) . '/config/wp-config.php';
 
-if ( file_exists( $env_config ) ) {
-    require_once $env_config;
+if ( file_exists( $user_config ) ) {
+    require_once $user_config;
 }
 
 /* That's all, stop editing! Happy publishing. */
