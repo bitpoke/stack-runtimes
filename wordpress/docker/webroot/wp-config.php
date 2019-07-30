@@ -90,6 +90,24 @@ if ( file_exists( $user_config ) ) {
     require_once $user_config;
 }
 
+/**
+ * Custom Settings
+ */
+if ( ! defined( 'AUTOMATIC_UPDATER_DISABLED' ) ) {
+	define( 'AUTOMATIC_UPDATER_DISABLED', true );
+}
+if ( ! defined( 'DISABLE_WP_CRON' ) ) {
+	define( 'DISABLE_WP_CRON', getenv( 'DISABLE_WP_CRON' ) ?: false );
+}
+if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
+	// Disable the plugin and theme file editor in the admin
+	define( 'DISALLOW_FILE_EDIT', true );
+}
+if ( ! defined( 'DISALLOW_FILE_MODS' ) ) {
+	// Disable plugin and theme updates and installation from the admin
+	define( 'DISALLOW_FILE_MODS', true );
+}
+
 /* That's all, stop editing! Happy publishing. */
 
 /** Absolute path to the WordPress directory. */
