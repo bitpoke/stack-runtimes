@@ -9,7 +9,6 @@ ENV DOCUMENT_ROOT=/app/html
 ENV COMPOSER_VERSION=1.8.6
 ENV SUPERVISORD_VERSION=0.6.3
 ENV DOCKERIZE_VERSION=1.2.0
-ENV RCLONE_VERSION=1.48.0
 # https://github.com/grpc/grpc/issues/13412
 ENV GRPC_ENABLE_FORK_SUPPORT=1
 ENV GRPC_POLL_STRATEGY=epoll1
@@ -46,7 +45,6 @@ RUN set -ex \
     && chmod 777 ${COMPOSER_HOME} ${COMPOSER_CACHE_DIR} \
     && /usr/local/docker/build-scripts/install-composer \
     && composer global require --prefer-dist hirak/prestissimo 0.3.9 \
-    && /usr/local/docker/build-scripts/install-rclone \
     && /usr/local/docker/build-scripts/install-dockerize \
     && /usr/local/docker/build-scripts/install-supervisord \
     && /usr/local/docker/build-scripts/install-php-extensions /usr/local/docker/build-scripts/php-extensions.minimal.yaml \
