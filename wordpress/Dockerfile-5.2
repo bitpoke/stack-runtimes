@@ -3,7 +3,7 @@ FROM quay.io/presslabs/php-runtime:7.3 as bedrock
 ENV WP_CLI_VERSION=2.2.0
 ENV WP_CLI_CONFIG_PATH=/app/wp-cli.yml
 ENV DOCUMENT_ROOT=/app/web
-ENV MEDIA_BUCKET_PATH=/app/uploads
+ENV STACK_MEDIA_PATH=/app/uploads
 USER root
 COPY docker/build-scripts /usr/local/docker/build-scripts/
 RUN set -ex \
@@ -22,7 +22,7 @@ USER www-data
 
 FROM bedrock
 ENV WORDPRESS_VERSION=5.2.2
-ENV MEDIA_BUCKET_PATH=/wp-content/uploads
+ENV STACK_MEDIA_PATH=/wp-content/uploads
 RUN set -ex \
     && wp core download --path=web/wp --version=${WORDPRESS_VERSION} \
     && cp /usr/local/docker/webroot/* /app/web/
