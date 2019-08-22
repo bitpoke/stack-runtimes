@@ -44,7 +44,8 @@ PHP docker images with batteries included for running WordPress
 * `SMTP_USER`
 * `SMTP_PASS`
 * `SMTP_PORT` (default to `587`)
-* `SMTP_TLS` (default to `yes`)
+* `SMTP_TLS` (default to `on`)
+* `SMTP_STARTTLS` (default to `on`)
 * `WORKER_GROUP` (default to `www-data`)
 * `WORKER_USER` (default to `www-data`)
 * `STACK_MEDIA_BUCKET` - if set serves the `STACK_MEDIA_PATH` from this media bucket
