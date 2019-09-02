@@ -16,8 +16,37 @@ local _M = { _VERSION = '0.1' }
 local cjson = require "cjson"
 local jwt = require "resty.jwt"
 
-local function get_access_token()
-    ngx.log(ngx.INFO, "Fetching a new access_token for GCS")
+local OAUTH2_INTERNAL_TOKEN_ENDPOINT = "/.internal/google-cloud/oauth2/v4/token"
+local MEDATADA_INTERNAL_ENDPOINT = "/.internal/google-cloud/metadata/computeMetadata"
+local METADATA_INTERNAL_TOKEN_ENDPOINT = MEDATADA_INTERNAL_ENDPOINT .. "/v1/instance/service-accounts/default/token"
+
+local function get_metadata_token()
+    ngx.log(ngx.INFO, "Fetching a new access_token from metadata server")
+
+    local ctx = {}
+
+    local res = ngx.location.capture(METADATA_INTERNAL_TOKEN_ENDPOINT, {
+        method = ngx.HTTP_GET,
+        ctx = ctx
+    })
+
+    if res.status ~= 200 then
+        return nil, "Failed getting access token. " .. (res.body or "")
+    else
+        local token = cjson.decode(res.body)
+        local cache_ttl = math.floor(tonumber(token['expires_in'] or "30") / 3)
+        -- this should not happen, but if our token expires in less than 30 seconds,
+        -- we cache it for 10 seconds regardless
+        -- NOTE: cache_ttl = 0 means cache forever
+        if 10 >= cache_ttl then
+            cache_ttl = 10
+        end
+        return token['access_token'], nil, cache_ttl
+    end
+end
+
+local function get_oauth2_token()
+    ngx.log(ngx.INFO, "Fetching a new google ouath2 access_token")
     local key = google_credentials['private_key']
     local jwt_obj = {
         header={
@@ -40,7 +69,7 @@ local function get_access_token()
         assertion=jwt_assertion
     })
 
-    local res = ngx.location.capture("/.token", {
+    local res = ngx.location.capture(OAUTH2_INTERNAL_TOKEN_ENDPOINT, {
         method = ngx.HTTP_POST,
         body = req_body,
         ctx = ctx
@@ -51,6 +80,14 @@ local function get_access_token()
     else
         local token = cjson.decode(res.body)
         return token['access_token']
+    end
+end
+
+local function get_access_token()
+    if google_credentials ~= nil then
+        return get_oauth2_token()
+    else
+        return get_metadata_token()
     end
 end
 
@@ -74,6 +111,24 @@ function _M.setup()
     end
 
     ngx.var.gcs_access_token = token
+end
+
+function _M.init()
+    local google_credentials = nil
+    if "" ~= (os.getenv("GOOGLE_CREDENTIALS") or "") then
+        google_credentials = cjson.decode(os.getenv("GOOGLE_CREDENTIALS"))
+    else
+        local well_known_gac_file = ((os.getenv("HOME") or "/var/www") .. "/.config/gcloud/google_application_credentials.json")
+        local gac_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or well_known_gac_file
+        local f, err = io.open(gac_file, "rb")
+        if err then
+            ngx.log(ngx.WARN, "Could not configure Google Application Credentials: ", err)
+        else
+            google_credentials = cjson.decode(f:read("*all"))
+            f:close()
+        end
+    end
+    return google_credentials
 end
 
 return _M
