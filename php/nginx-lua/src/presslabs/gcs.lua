@@ -121,9 +121,9 @@ function _M.init()
         local well_known_gac_file = ((os.getenv("HOME") or "/var/www") .. "/.config/gcloud/google_application_credentials.json")
         local gac_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or well_known_gac_file
         local f, err = io.open(gac_file, "rb")
-        if err then
+        if err and gac_file ~= well_known_gac_file then
             ngx.log(ngx.WARN, "Could not configure Google Application Credentials: ", err)
-        else
+        elseif not err then
             google_credentials = cjson.decode(f:read("*all"))
             f:close()
         end
