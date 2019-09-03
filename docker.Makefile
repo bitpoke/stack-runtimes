@@ -22,7 +22,7 @@ define build_targets_for
 $(patsubst Dockerfile-%,$(1)-%,$(DOCKERFILES))
 endef
 
-DOCKER_BUILD := docker build --pull
+DOCKER_BUILD ?= docker build --pull
 
 .PHONY: images
 $(call build_targets_for, $(RUNTIME)):
@@ -56,7 +56,9 @@ push-$(RUNTIME)-%: .build/tag-$(RUNTIME)-%
 
 .PRECIOUS: .build/$(RUNTIME)-%
 .build/$(RUNTIME)-%: Dockerfile-% $(SRCS) | .build
-	$(DOCKER_BUILD) $(patsubst %,--build-arg BASE_IMAGE=%,$(BASE_IMAGE)) \
+	$(DOCKER_BUILD) \
+		$(patsubst %,--build-arg BASE_IMAGE=%,$(BASE_IMAGE)) \
+		$(patsubst %,--build-arg PHP_BASE_IMAGE=%,$(PHP_BASE_IMAGE)) \
 		-t local$@ \
 		--cache-from $(REGISTRY):$(@:.build/$(RUNTIME)-%=%) \
 		--cache-from $(REGISTRY):$(@:.build/$(RUNTIME)-%=%)$(TAG_SUFFIX_SLUG) \
