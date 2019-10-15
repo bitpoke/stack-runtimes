@@ -1,6 +1,6 @@
 ARG BASE_IMAGE=quay.io/presslabs/wordpress-runtime:bedrock-php-7.3
 FROM ${BASE_IMAGE} as bedrock
-ENV WORDPRESS_VERSION=5.2.3
+ENV WORDPRESS_VERSION=5.2.4
 ENV STACK_MEDIA_PATH=/wp-content/uploads
 RUN set -ex \
     && wp core download --path=web/wp --version=${WORDPRESS_VERSION} \
