@@ -1,4 +1,4 @@
-ARG PHP_VERSION=7.3.9
+ARG PHP_VERSION=7.3.10
 FROM php:${PHP_VERSION}-fpm-buster as php
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV PATH="/usr/local/docker/bin:${PATH}"
@@ -6,7 +6,7 @@ ENV PHP_VERSION=${PHP_VERSION}
 ENV PORT=8080
 ENV DOCUMENT_ROOT=/app/html
 
-ENV COMPOSER_VERSION=1.8.6
+ENV COMPOSER_VERSION=1.9.0
 ENV SUPERVISORD_VERSION=0.6.3
 ENV DOCKERIZE_VERSION=1.2.0
 # https://github.com/grpc/grpc/issues/13412
