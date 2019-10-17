@@ -88,6 +88,18 @@ if ( file_exists( $user_config ) ) {
     require_once $user_config;
 }
 
+if ( ! defined( 'CONTENT_DIR' ) ) {
+	define( 'CONTENT_DIR', '/wp-content' );
+}
+
+if ( ! defined( 'WP_CONTENT_DIR' ) ) {
+	define( 'WP_CONTENT_DIR', __DIR__ . CONTENT_DIR );
+}
+
+if ( ! defined( 'WP_CONTENT_URL' ) ) {
+	define( 'WP_CONTENT_URL', WP_HOME . CONTENT_DIR );
+}
+
 /**
  * Custom Settings
  */
