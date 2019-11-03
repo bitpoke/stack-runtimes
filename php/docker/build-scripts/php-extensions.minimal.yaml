@@ -46,7 +46,7 @@
 
 # Install mcrypt for backward compatibility
 - name: mcrypt
-  version: 1.0.2
+  version: 1.0.3
   type: pecl
   build:
     depends:
@@ -55,7 +55,7 @@
 # install apcu before serializers so that they detect and enable support for it
 - name: apcu
   type: pecl
-  version: 5.1.17
+  version: 5.1.18
   priority: 30
 - name: apc
   pecl_name: apcu_bc
@@ -73,7 +73,7 @@
 
 - name: memcached
   type: pecl
-  version: 3.1.3
+  version: 3.1.4
   build:
     depends:
       - "libmemcached-dev"
