@@ -128,9 +128,22 @@ function main() {
     foreach ($extensions as $extension) {
         $name = $extension["name"];
         $type = @$extension["type"] ?: "";
+        $phpMinVersion = @$extension["phpMinVersion"] ?: "";
+        $phpMaxVersion = @$extension["phpMaxVersion"] ?: "";
         $buildArgs = @$extension["build"]["args"] ?: array();
+
         if (extension_loaded($name)) {
             error_log("!!!! Skipping $name as it's already installed");
+            continue;
+        }
+
+        if (!empty($phpMinVersion) && version_compare(PHP_VERSION, $phpMinVersion, ">=") === false) {
+            error_log("!!!! Skipping $name as PHP version " . PHP_VERSION . " is older than $phpMinVersion");
+            continue;
+        }
+
+        if (!empty($phpMaxVersion) && version_compare(PHP_VERSION, $phpMaxVersion, "<") === false) {
+            error_log("!!!! Skipping $name as PHP version " . PHP_VERSION . " is newer than $phpMaxVersion");
             continue;
         }
 

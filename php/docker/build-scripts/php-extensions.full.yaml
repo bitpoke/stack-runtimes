@@ -1,13 +1,23 @@
 - name: "exif"
 - name: "gd"
+  phpMaxVersion: 7.4
   build:
     args:
-      - "--with-freetype-dir=/usr/include/"
       - "--with-jpeg-dir=/usr/include/"
       - "--with-png-dir=/usr/include/"
       - "--with-webp-dir=/usr/include/"
     depends:
-      - libfreetype6-dev
+      - libjpeg62-turbo-dev
+      - libpng-dev
+      - libwebp-dev
+- name: "gd"
+  phpMinVersion: 7.4
+  build:
+    args:
+      - "--with-jpeg=/usr/include/"
+      - "--with-png=/usr/include/"
+      - "--with-webp=/usr/include/"
+    depends:
       - libjpeg62-turbo-dev
       - libpng-dev
       - libwebp-dev
@@ -71,17 +81,17 @@
 # install serializers to make them available for the rest of the extensions
 - name: igbinary
   type: pecl
-  version: 3.0.1
+  version: 3.1.0
 - name: msgpack
   type: pecl
-  version: 2.0.3
+  version: 2.1.0beta1
 - name: protobuf
   type: pecl
-  version: 3.10.0
+  version: 3.11.2
 
 - name: grpc
   type: pecl
-  version: 1.23.1
+  version: 1.26.0
 - name: imagick
   type: pecl
   version: 3.4.3
@@ -92,10 +102,10 @@
       - "libmagickwand-dev"
 - name: mailparse
   type: pecl
-  version: 3.0.3
+  version: 3.0.4
 - name: memcached
   type: pecl
-  version: 3.1.4
+  version: 3.1.5
   build:
     depends:
       - "libmemcached-dev"
@@ -106,13 +116,13 @@
       - "--enable-memcached-json"
 - name: oauth
   type: pecl
-  version: 2.0.3
+  version: 2.0.4
   build:
     depends:
       - 'libpcre3-dev'
 - name: redis
   type: pecl
-  version: 5.1.0
+  version: 5.1.1
   build:
     args:
       - "--enable-redis-igbinary"

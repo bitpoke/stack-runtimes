@@ -1,11 +1,22 @@
 - name: "bcmath"
 - name: "exif"
 - name: "gd"
+  phpMaxVersion: 7.4
   build:
     args:
       - "--with-jpeg-dir=/usr/include/"
       - "--with-png-dir=/usr/include/"
       - "--with-webp-dir=/usr/include/"
+    depends:
+      - libjpeg62-turbo-dev
+      - libpng-dev
+      - libwebp-dev
+- name: "gd"
+  phpMinVersion: 7.4
+  build:
+    args:
+      - "--with-jpeg=/usr/include/"
+      - "--with-webp=/usr/include/"
     depends:
       - libjpeg62-turbo-dev
       - libpng-dev
@@ -65,15 +76,15 @@
 # install serializers to make them available for the rest of the extensions
 - name: igbinary
   type: pecl
-  version: 3.0.1
+  version: 3.1.0
 
 - name: mailparse
   type: pecl
-  version: 3.0.3
+  version: 3.0.4
 
 - name: memcached
   type: pecl
-  version: 3.1.4
+  version: 3.1.5
   build:
     depends:
       - "libmemcached-dev"

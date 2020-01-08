@@ -1,4 +1,4 @@
-ARG PHP_VERSION=7.2.26
+ARG PHP_VERSION=7.4.1
 FROM php:${PHP_VERSION}-fpm-buster as php
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV PATH="/usr/local/docker/bin:${PATH}"
@@ -14,6 +14,9 @@ ENV GRPC_ENABLE_FORK_SUPPORT=1
 ENV GRPC_POLL_STRATEGY=epoll1
 # keep wp-cli happy
 ENV PAGER=cat
+
+# workaround for https://github.com/docker-library/php/issues/924
+ENV PHP_OPENSSL=yes
 
 # configure composer
 ENV COMPOSER_CACHE_DIR=/var/lib/composer/cache
