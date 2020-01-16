@@ -73,6 +73,7 @@ COPY --chown=www-data:www-data ./docker /usr/local/docker
 COPY --chown=www-data:www-data ./nginx-lua /usr/local/docker/lib/nginx/lua/
 USER www-data:www-data
 
+STOPSIGNAL SIGTERM
 EXPOSE 8080
 ENTRYPOINT ["/usr/local/docker/bin/docker-entrypoint"]
 CMD ["supervisord", "-c", "/usr/local/docker/etc/supervisor.conf"]
