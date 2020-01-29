@@ -42,7 +42,7 @@ PHP docker images with batteries included for running WordPress
 * `SERVER_NAME` (default to `_`)
 * `SMTP_HOST` (default to `localhost`)
 * `SMTP_USER`
-* `SMTP_PASS`
+* `SMTP_PASSWORD`
 * `SMTP_PORT` (default to `587`)
 * `SMTP_TLS` (default to `on`)
 * `SMTP_STARTTLS` (default to `on`)
