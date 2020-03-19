@@ -41,6 +41,7 @@
 - name: pcntl
 - name: shmop
 - name: xmlrpc
+- name: soap
 - name: xsl
   build:
     depends:
