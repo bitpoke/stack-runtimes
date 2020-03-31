@@ -1,3 +1,4 @@
+- name: pdo
 - name: "bcmath"
 - name: "exif"
 - name: "gd"
@@ -37,6 +38,7 @@
       - "zlib1g-dev"
 - name: gettext
 - name: mysqli
+- name: pdo_mysql
 - name: opcache
 - name: pcntl
 - name: shmop

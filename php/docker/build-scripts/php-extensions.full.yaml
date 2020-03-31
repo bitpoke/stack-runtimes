@@ -1,3 +1,4 @@
+- name: pdo
 - name: "exif"
 - name: "gd"
   phpMaxVersion: 7.4
@@ -36,6 +37,7 @@
       - "zlib1g-dev"
 - name: gettext
 - name: mysqli
+- name: pdo_mysql
 - name: opcache
 - name: pcntl
 - name: shmop
