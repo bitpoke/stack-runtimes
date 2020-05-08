@@ -14,10 +14,12 @@ local DockerSetupStep(override) = {
     'dockerize -wait unix:///var/run/docker.sock -timeout 10s',
     'docker info',
   ] + self.extr_commands,
-  volumes: {
-    name: 'dockersock',
-    path: '/var/run',
-  },
+  volumes: [
+    {
+      name: 'dockersock',
+      path: '/var/run',
+    },
+  ],
 } + override;
 
 local PublishPipeline(dir, name, depends_on=[]) = {
