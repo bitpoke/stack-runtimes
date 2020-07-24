@@ -79,11 +79,14 @@
 # install serializers to make them available for the rest of the extensions
 - name: igbinary
   type: pecl
-  version: 3.1.0
+  version: 3.1.2
+- name: msgpack
+  type: pecl
+  version: 2.1.0
 
 - name: mailparse
   type: pecl
-  version: 3.0.4
+  version: 3.1.0
 
 - name: memcached
   type: pecl
@@ -94,6 +97,7 @@
       - "zlib1g-dev"
     args:
       - "--enable-memcached-igbinary"
+      - "--enable-memcached-msgpack"
       - "--enable-memcached-json"
 
 - name: imagick
@@ -102,3 +106,13 @@
   build:
     depends:
       - "libmagickwand-dev"
+
+- name: redis
+  type: pecl
+  version: 5.3.1
+  build:
+    args:
+      - "--enable-redis-igbinary"
+      - "--enable-redis-msgpack"
+      - "--enable-redis-lzf"
+
