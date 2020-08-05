@@ -115,3 +115,77 @@ module lua-resty-mlcache-2.2.1
   section 33772 34207 license
 
 # END lua-resty-mlcache
+# BEGIN nginx-lua-prometheus
+
+dist nginx-lua-prometheus-0.20200523
+  modules integration.readme nginx-lua-prometheus-0.20200523 nginx-lua-prometheus-0.20200523
+
+module integration.readme
+
+module nginx-lua-prometheus-0.20200523
+  section 352 17026 prometheus metric library for nginx
+  section 566 1124 installation
+  section 1124 3513 quick start guide
+  section 3513 13881 api reference
+  section 3537 4726 init()
+  section 4726 5895 prometheus:counter()
+  section 5895 6768 prometheus:gauge()
+  section 6768 7914 prometheus:histogram()
+  section 7914 8345 prometheus:collect()
+  section 8345 8462 prometheus:metric_data()
+  section 8462 9308 counter:inc()
+  section 9308 10209 counter:del()
+  section 10209 10610 counter:reset()
+  section 10610 11225 gauge:set()
+  section 11225 11963 gauge:inc()
+  section 11963 12722 gauge:del()
+  section 12722 12992 gauge:reset()
+  section 12992 13597 histogram:observe()
+  section 13597 13881 built-in metrics
+  section 13881 14682 caveats
+  section 13899 14682 usage in stream module
+  section 14682 15288 troubleshooting
+  section 14708 15103 make sure that nginx lua module is enabled
+  section 15103 15288 keep lua code cache enabled
+  section 15288 16049 development
+  section 15310 15447 install dependencies for testing
+  section 15447 15641 run tests
+  section 15641 16049 releasing new version
+  section 16049 16685 credits
+  section 16685 17026 license
+  section 16732 17026 third party license
+
+module nginx-lua-prometheus-0.20200523
+  section 352 17026 prometheus metric library for nginx
+  section 566 1124 installation
+  section 1124 3513 quick start guide
+  section 3513 13881 api reference
+  section 3537 4726 init()
+  section 4726 5895 prometheus:counter()
+  section 5895 6768 prometheus:gauge()
+  section 6768 7914 prometheus:histogram()
+  section 7914 8345 prometheus:collect()
+  section 8345 8462 prometheus:metric_data()
+  section 8462 9308 counter:inc()
+  section 9308 10209 counter:del()
+  section 10209 10610 counter:reset()
+  section 10610 11225 gauge:set()
+  section 11225 11963 gauge:inc()
+  section 11963 12722 gauge:del()
+  section 12722 12992 gauge:reset()
+  section 12992 13597 histogram:observe()
+  section 13597 13881 built-in metrics
+  section 13881 14682 caveats
+  section 13899 14682 usage in stream module
+  section 14682 15288 troubleshooting
+  section 14708 15103 make sure that nginx lua module is enabled
+  section 15103 15288 keep lua code cache enabled
+  section 15288 16049 development
+  section 15310 15447 install dependencies for testing
+  section 15447 15641 run tests
+  section 15641 16049 releasing new version
+  section 16049 16685 credits
+  section 16685 17026 license
+  section 16732 17026 third party license
+
+# END nginx-lua-prometheus
