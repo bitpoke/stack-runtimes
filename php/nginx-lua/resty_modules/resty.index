@@ -115,3 +115,119 @@ module lua-resty-mlcache-2.2.1
   section 33772 34207 license
 
 # END lua-resty-mlcache
+# BEGIN nginx-lua-prometheus
+
+dist nginx-lua-prometheus-0.20200523
+  modules integration.readme nginx-lua-prometheus-0.20200523 nginx-lua-prometheus-0.20200523
+
+module integration.readme
+
+module nginx-lua-prometheus-0.20200523
+  section 352 17026 prometheus metric library for nginx
+  section 566 1124 installation
+  section 1124 3513 quick start guide
+  section 3513 13881 api reference
+  section 3537 4726 init()
+  section 4726 5895 prometheus:counter()
+  section 5895 6768 prometheus:gauge()
+  section 6768 7914 prometheus:histogram()
+  section 7914 8345 prometheus:collect()
+  section 8345 8462 prometheus:metric_data()
+  section 8462 9308 counter:inc()
+  section 9308 10209 counter:del()
+  section 10209 10610 counter:reset()
+  section 10610 11225 gauge:set()
+  section 11225 11963 gauge:inc()
+  section 11963 12722 gauge:del()
+  section 12722 12992 gauge:reset()
+  section 12992 13597 histogram:observe()
+  section 13597 13881 built-in metrics
+  section 13881 14682 caveats
+  section 13899 14682 usage in stream module
+  section 14682 15288 troubleshooting
+  section 14708 15103 make sure that nginx lua module is enabled
+  section 15103 15288 keep lua code cache enabled
+  section 15288 16049 development
+  section 15310 15447 install dependencies for testing
+  section 15447 15641 run tests
+  section 15641 16049 releasing new version
+  section 16049 16685 credits
+  section 16685 17026 license
+  section 16732 17026 third party license
+
+module nginx-lua-prometheus-0.20200523
+  section 352 17026 prometheus metric library for nginx
+  section 566 1124 installation
+  section 1124 3513 quick start guide
+  section 3513 13881 api reference
+  section 3537 4726 init()
+  section 4726 5895 prometheus:counter()
+  section 5895 6768 prometheus:gauge()
+  section 6768 7914 prometheus:histogram()
+  section 7914 8345 prometheus:collect()
+  section 8345 8462 prometheus:metric_data()
+  section 8462 9308 counter:inc()
+  section 9308 10209 counter:del()
+  section 10209 10610 counter:reset()
+  section 10610 11225 gauge:set()
+  section 11225 11963 gauge:inc()
+  section 11963 12722 gauge:del()
+  section 12722 12992 gauge:reset()
+  section 12992 13597 histogram:observe()
+  section 13597 13881 built-in metrics
+  section 13881 14682 caveats
+  section 13899 14682 usage in stream module
+  section 14682 15288 troubleshooting
+  section 14708 15103 make sure that nginx lua module is enabled
+  section 15103 15288 keep lua code cache enabled
+  section 15288 16049 development
+  section 15310 15447 install dependencies for testing
+  section 15447 15641 run tests
+  section 15641 16049 releasing new version
+  section 16049 16685 credits
+  section 16685 17026 license
+  section 16732 17026 third party license
+
+# END nginx-lua-prometheus
+# BEGIN lua-resty-http
+
+dist lua-resty-http-0.14
+  aliases resty.http
+  modules lua-resty-http-0.14
+
+module lua-resty-http-0.14
+  aliases resty.http
+  section 18 175 lua-resty-http
+  section 175 211 status
+  section 211 576 features
+  section 576 3377 api
+  section 1232 3377 synopsis
+  section 3377 9697 connection
+  section 3398 3540 new
+  section 3540 4288 connect
+  section 4288 6188 connect_proxy
+  section 6188 6343 set_timeout
+  section 6343 6663 set_timeouts
+  section 6663 6951 ssl_handshake
+  section 6951 8029 set_keepalive
+  section 8029 8906 set_proxy_options
+  section 8906 9486 get_reused_times
+  section 9486 9697 close
+  section 9697 13324 requesting
+  section 9718 11008 request
+  section 11008 12106 request_uri
+  section 12106 13324 request_pipeline
+  section 13324 14358 response
+  section 13343 14081 res.body_reader
+  section 14081 14189 res:read_body
+  section 14189 14358 res:read_trailers
+  section 14358 15553 proxy
+  section 14904 15265 proxy_request
+  section 15265 15553 proxy_response
+  section 15553 17202 utility
+  section 15571 16210 parse_uri
+  section 16210 17202 get_client_body_reader
+  section 17202 17434 author
+  section 17434 18882 licence
+
+# END lua-resty-http
