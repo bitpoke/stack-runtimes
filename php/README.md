@@ -56,6 +56,24 @@ PHP docker images with batteries included for running WordPress
 * `STACK_METRICS_PHP_PATH` (default to `/metrics/php-fpm`)
 * `STACK_METRICS_NGINX_PATH` (default to `/metrics/nginx`)
 * `STACK_METRICS_WORDPRESS_PATH` (default to `/metrics/wordpress`)
+* `STACK_PAGE_CACHE_ENABLED` (default to `true`) - toggles full page caching
+* `STACK_PAGE_CACHE_BACKEND` - can be `redis`, `memcached` or `custom`
+* `STACK_PAGE_CACHE_REDIS_HOST` (default to `localhost`)
+* `STACK_PAGE_CACHE_REDIS_PORT` (default to `6379`)
+* `STACK_PAGE_CACHE_MEMCACHED_HOST` (default to `127.0.0.1`)
+* `STACK_PAGE_CACHE_MEMCACHED_PORT` (default to `11211`)
+* `STACK_PAGE_CACHE_MEMCACHED_USE_VERSIONED_KEYS` (default to `true`) - toggles versioned keys
+  for memcached caching, which allows for fast invalidation (necessary when using mcrouter)
+* `STACK_PAGE_CACHE_KEY_PREFIX` (default to `nginx-cache:`) - the prefix for the cache keys
+* `STACK_PAGE_CACHE_KEY_UID` (default to `https$request_method$host$request_uri`) - the uniquely
+  identifying part of a cache key (forms the cache key together with `STACK_PAGE_CACHE_KEY_PREFIX`)
+* `STACK_PAGE_CACHE_DEBUG` (default to `false`) - toggles extra response headers for debugging
+* `STACK_PAGE_CACHE_STORE_STATUSES` (default to `200 301 302`) - only responses with status codes
+  included in this list are cached
+* `STACK_PAGE_CACHE_RESPONSE_CACHE_CONTROL` (default to `on`) - corresponds to
+  https://github.com/openresty/srcache-nginx-module#srcache_response_cache_control
+* `STACK_PAGE_CACHE_EXPIRE_SECONDS` (default to `360`) - the default cache TTL when not specified
+  otherwise in a response header (`cache-control` or `expires`)
 
 ## OpenResty modules
 Lua modules found in `/php/nginx-lua` are installed via [opm](https://opm.openresty.org) using the `--cwd` option.
