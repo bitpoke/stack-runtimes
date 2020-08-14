@@ -56,6 +56,9 @@ PHP docker images with batteries included for running WordPress
 * `STACK_METRICS_PHP_PATH` (default to `/metrics/php-fpm`)
 * `STACK_METRICS_NGINX_PATH` (default to `/metrics/nginx`)
 * `STACK_METRICS_WORDPRESS_PATH` (default to `/metrics/wordpress`)
+* `BLACKFIRE_SERVER_ID` sets the server id used to authenticate with Blackfire. (default to `''`)
+* `BLACKFIRE_SERVER_TOKEN` sets the server token used to authenticate with Blackfire. (default to `''`)
+
 
 ## OpenResty modules
 Lua modules found in `/php/nginx-lua` are installed via [opm](https://opm.openresty.org) using the `--cwd` option.

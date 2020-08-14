@@ -53,6 +53,13 @@ RUN set -ex \
     && /usr/local/docker/build-scripts/install-php-extensions /usr/local/docker/build-scripts/php-extensions.minimal.yaml \
     && rm -rf /var/lib/apt/lists/* /tmp/pear/* ${COMPOSER_CACHE_DIR:?}/*
 
+# install Blackfire
+RUN set -ex \
+    && curl -s https://packages.blackfire.io/gpg.key | apt-key add - \
+    && echo "deb http://packages.blackfire.io/debian any main" >> /etc/apt/sources.list \
+    && apt-get update && apt-get install --no-install-recommends -y blackfire-agent blackfire-php \
+    && rm -f /usr/local/etc/php/conf.d/zz-blackfire.ini
+
 WORKDIR /app
 # prepare rootfs
 RUN set -ex \
