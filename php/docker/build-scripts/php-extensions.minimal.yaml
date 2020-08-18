@@ -42,6 +42,7 @@
 - name: opcache
 - name: pcntl
 - name: shmop
+- name: simplexml
 - name: xmlrpc
 - name: soap
 - name: xsl
