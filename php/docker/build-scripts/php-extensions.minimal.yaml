@@ -80,10 +80,10 @@
 # install serializers to make them available for the rest of the extensions
 - name: igbinary
   type: pecl
-  version: 3.1.2
+  version: 3.1.4
 - name: msgpack
   type: pecl
-  version: 2.1.0
+  version: 2.1.1
 
 - name: mailparse
   type: pecl
