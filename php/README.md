@@ -56,6 +56,7 @@ PHP docker images with batteries included for running WordPress
 * `STACK_METRICS_PHP_PATH` (default to `/metrics/php-fpm`)
 * `STACK_METRICS_NGINX_PATH` (default to `/metrics/nginx`)
 * `STACK_METRICS_WORDPRESS_PATH` (default to `/metrics/wordpress`)
+* `STACK_BLOCK_NON_WP_STANDARD_PHP_PATHS` (default to `true`)
 * `STACK_PAGE_CACHE_ENABLED` (default to `false`) - toggles full page caching
 * `STACK_PAGE_CACHE_BACKEND` - can be `redis`, `memcached` or `custom`
 * `STACK_PAGE_CACHE_REDIS_HOST` (default to `localhost`)
