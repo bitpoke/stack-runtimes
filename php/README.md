@@ -51,7 +51,7 @@ PHP docker images with batteries included for running WordPress
 * `STACK_MEDIA_BUCKET` - if set serves the `STACK_MEDIA_PATH` from this media bucket
   (eg. gs://my-google-cloud-storage-bucket/prefix or s3://my-aws-s3-bucket)
 * `STACK_MEDIA_PATH` (default to `/media`)
-* `STACK_METRICS_ENABLED` (default to `false`)
+* `STACK_METRICS_ENABLED` (default to `true`)
 * `STACK_METRICS_PORT` (default to `9145`)
 * `STACK_METRICS_PHP_PATH` (default to `/metrics/php-fpm`)
 * `STACK_METRICS_NGINX_PATH` (default to `/metrics/nginx`)
@@ -62,8 +62,6 @@ PHP docker images with batteries included for running WordPress
 * `STACK_PAGE_CACHE_REDIS_PORT` (default to `6379`)
 * `STACK_PAGE_CACHE_MEMCACHED_HOST` (default to `127.0.0.1`)
 * `STACK_PAGE_CACHE_MEMCACHED_PORT` (default to `11211`)
-* `STACK_PAGE_CACHE_MEMCACHED_USE_VERSIONED_KEYS` (default to `true`) - toggles versioned keys
-  for memcached caching, which allows for fast invalidation (necessary when using mcrouter)
 * `STACK_PAGE_CACHE_KEY_PREFIX` (default to `nginx-cache:`) - the prefix for the cache keys
 * `STACK_PAGE_CACHE_KEY_UID` (default to `https$request_method$host$request_uri`) - the uniquely
   identifying part of a cache key (forms the cache key together with `STACK_PAGE_CACHE_KEY_PREFIX`)
@@ -74,6 +72,13 @@ PHP docker images with batteries included for running WordPress
   https://github.com/openresty/srcache-nginx-module#srcache_response_cache_control
 * `STACK_PAGE_CACHE_EXPIRE_SECONDS` (default to `360`) - the default cache TTL when not specified
   otherwise in a response header (`cache-control` or `expires`)
+* `STACK_PAGE_CACHE_KEY_INCLUDED_QUERY_PARAMS` - a list of query parameters separated by `,` which will be
+  included in the cache key
+* `STACK_PAGE_CACHE_KEY_DISCARDED_QUERY_PARAMS` - a list of query parameters separated by `,` which
+  will not be included in the cache key (the request uri that reaches the backend remains unaltered);
+
+Request query parameters that are not specified in `STACK_PAGE_CACHE_KEY_INCLUDED_QUERY_PARAMS` 
+or `STACK_PAGE_CACHE_KEY_DISCARDED_QUERY_PARAMS` will result in a cache skip.
 
 ## OpenResty modules
 Lua modules found in `/php/nginx-lua` are installed via [opm](https://opm.openresty.org) using the `--cwd` option.
