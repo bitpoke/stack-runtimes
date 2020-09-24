@@ -51,7 +51,7 @@ PHP docker images with batteries included for running WordPress
 * `STACK_MEDIA_BUCKET` - if set serves the `STACK_MEDIA_PATH` from this media bucket
   (eg. gs://my-google-cloud-storage-bucket/prefix or s3://my-aws-s3-bucket)
 * `STACK_MEDIA_PATH` (default to `/media`)
-* `STACK_METRICS_ENABLED` (default to `false`)
+* `STACK_METRICS_ENABLED` (default to `true`)
 * `STACK_METRICS_PORT` (default to `9145`)
 * `STACK_METRICS_PHP_PATH` (default to `/metrics/php-fpm`)
 * `STACK_METRICS_NGINX_PATH` (default to `/metrics/nginx`)
