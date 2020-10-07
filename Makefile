@@ -1,8 +1,8 @@
 include common.Makefile
 
 REGISTRY ?= quay.io/presslabs
-PHP_VERSION ?= 7.3.7
-WORDPRESS_VERSION ?= 5.2.2
+PHP_VERSION ?= 7.4.11
+WORDPRESS_VERSION ?= 5.5.1
 
 ifndef CI
 TAG_SUFFIX ?= canary
@@ -13,7 +13,7 @@ BUILD_TAG ?= build
 WORDPRESS_PHP_SERIES := $(shell ./hack/wordpress-php-series $(WORDPRESS_VERSION))
 
 # The PHP series for which to build the default bedrock tag
-BEDROCK_PHP_SERIES := 7.3
+BEDROCK_PHP_SERIES := 7.4
 
 GIT_COMMIT = $(shell git describe --always --abbrev=40 --dirty)
 
