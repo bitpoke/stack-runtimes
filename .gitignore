@@ -1,2 +1,4 @@
 docker-compose/html
 .build
+
+.#*
