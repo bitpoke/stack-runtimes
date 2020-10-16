@@ -11,8 +11,12 @@ PHP docker images with batteries included for running WordPress
 * `NGINX_ACCESS_LOG` (default to `off`) - where to write nginx's access log
 * `NGINX_ERROR_LOG` (default to `/dev/stderr`) - where to write nginx's error
   log
+* `NGINX_ERROR_LOG_LEVEL` (default to `warn`) - the nginx's error log level
 * `NGINX_STATUS_PATH` (default to `/-/nginx-status`) - where to expose nginx's
   status
+* `NGINX_WORKER_PROCESSES` (default to `auto`) - the number of worker processes
+* `NGINX_WORKER_SHUTDOWN_TIMEOUT` (default to `10`) -  a timeout (in seconds)
+  for a graceful shutdown of worker processes
 * `PHP_ACCESS_LOG_FORMAT` (default to `%R - %u %t \"%m %r\" %s`) - see
   http://php.net/manual/ro/install.fpm.configuration.php for more options
 * `PHP_ACCESS_LOG` (default to `/var/log/stdout`) - where to write php's
