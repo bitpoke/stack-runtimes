@@ -91,6 +91,12 @@
 - name: protobuf
   type: pecl
   version: 3.13.0
+- name: zstd
+  type: pecl
+  version: 0.9.0
+  build:
+    depends:
+      - "libzstd-dev"
 
 - name: grpc
   type: pecl
@@ -131,3 +137,4 @@
       - "--enable-redis-igbinary"
       - "--enable-redis-msgpack"
       - "--enable-redis-lzf"
+      - "--enable-redis-zstd"

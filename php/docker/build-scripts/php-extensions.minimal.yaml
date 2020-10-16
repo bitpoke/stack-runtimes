@@ -85,6 +85,13 @@
   type: pecl
   version: 2.1.1
 
+- name: zstd
+  type: pecl
+  version: 0.9.0
+  build:
+    depends:
+      - "libzstd-dev"
+
 - name: mailparse
   type: pecl
   version: 3.1.0
@@ -116,4 +123,5 @@
       - "--enable-redis-igbinary"
       - "--enable-redis-msgpack"
       - "--enable-redis-lzf"
+      - "--enable-redis-zstd"
 
