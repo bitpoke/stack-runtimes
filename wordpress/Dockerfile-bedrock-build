@@ -8,7 +8,6 @@ ONBUILD ENV COMPOSER_AUTH ${COMPOSER_AUTH}
 
 # Install project dependencies as first build step for child images so that we
 # heat up composer cache
-# ONBUILD COPY --chown=www-data:www-data composer.json composer.lock auth.json /src/
 ONBUILD COPY --chown=www-data:www-data composer.json composer.lock /src/
 ONBUILD RUN COMPOSER_AUTH=${COMPOSER_AUTH} composer install --no-dev --no-interaction --no-progress --no-ansi --no-scripts
 
