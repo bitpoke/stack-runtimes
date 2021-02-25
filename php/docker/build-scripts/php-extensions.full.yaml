@@ -47,6 +47,7 @@
       - "libtidy-dev"
 - name: simplexml
 - name: xmlrpc
+  type: pecl
 - name: xsl
   build:
     depends:
