@@ -60,7 +60,7 @@ function install_extension($name, $buildArgs = array()) {
     run(...$cmd);
 }
 
-function install_pecl_extension(string $ext, string $name, string $version, $buildArgs = array(), string $priority) {
+function install_pecl_extension(string $ext, string $name, string $version, string $priority, $buildArgs = array()) {
     global $dryRun;
     $cwd = getcwd();
     $extDir = pecl_temp_dir() . "/$ext";
@@ -152,7 +152,7 @@ function main() {
             $peclName = @$extension["pecl_name"] ?: $name;
             $peclVersion = @$extension["version"] ?: "stable";
             $priority = @$extension["priority"] ?: "50";
-            install_pecl_extension($peclName, $name, $peclVersion, $buildArgs, $priority);
+            install_pecl_extension($peclName, $name, $peclVersion, $priority, $buildArgs);
             break;
         default:
             install_extension($name, $buildArgs);
