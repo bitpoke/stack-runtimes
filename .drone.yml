@@ -1,5 +1,62 @@
 ---
 kind: pipeline
+name: php-runtime-8.0
+
+steps:
+- &step
+  name: setup docker
+  pull: always
+  image: quay.io/presslabs/bfc
+  environment: &baseEnv
+    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+    TEST_HOSTNAME: docker
+  commands:
+    - dockerize -wait unix:///var/run/docker.sock -timeout 10s
+    - docker info
+    - make -C php pull-$DRONE_STAGE_NAME
+  volumes:
+  - name: dockersock
+    path: /var/run
+
+- <<: *step
+  name: build image
+  pull: default
+  commands:
+    - make -C php $DRONE_STAGE_NAME
+
+- <<: *step
+  name: test image
+  pull: default
+  commands:
+    - make -C php test-$DRONE_STAGE_NAME
+
+- <<: *step
+  name: publish
+  pull: default
+  environment:
+    <<: *baseEnv
+    DOCKER_USER: "presslabs+drone"
+    DOCKER_PASSWORD:
+      from_secret: QUAY_TOKEN
+  commands:
+    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
+    - make -C php push-$DRONE_STAGE_NAME
+
+services:
+- name: docker
+  image: docker:dind
+  privileged: true
+  volumes:
+  - name: dockersock
+    path: /var/run
+
+volumes:
+- name: dockersock
+  temp: {}
+
+
+---
+kind: pipeline
 name: php-runtime-7.4
 
 steps:
@@ -53,6 +110,7 @@ services:
 volumes:
 - name: dockersock
   temp: {}
+
 ---
 kind: pipeline
 name: php-runtime-7.3
@@ -108,6 +166,67 @@ services:
 volumes:
 - name: dockersock
   temp: {}
+
+---
+kind: pipeline
+name: wordpress-runtime-bedrock-php-8.0
+
+depends_on:
+  - php-runtime-8.0
+
+steps:
+- &step
+  name: setup docker
+  pull: always
+  image: quay.io/presslabs/bfc
+  environment: &baseEnv
+    TAG_SUFFIX: ${DRONE_BRANCH/master/}
+    TEST_HOSTNAME: docker
+  commands:
+    - dockerize -wait unix:///var/run/docker.sock -timeout 10s
+    - docker info
+    - make -C wordpress pull-$DRONE_STAGE_NAME
+  volumes:
+  - name: dockersock
+    path: /var/run
+
+- <<: *step
+  name: build image
+  pull: default
+  commands:
+    - make -C wordpress $DRONE_STAGE_NAME
+
+- <<: *step
+  name: test image
+  pull: default
+  commands:
+    - make -C wordpress test-$DRONE_STAGE_NAME
+
+- <<: *step
+  name: publish
+  pull: default
+  environment:
+    <<: *baseEnv
+    DOCKER_USER: "presslabs+drone"
+    DOCKER_PASSWORD:
+      from_secret: QUAY_TOKEN
+  commands:
+    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" quay.io
+    - make -C wordpress push-$DRONE_STAGE_NAME
+
+services:
+- name: docker
+  image: docker:dind
+  privileged: true
+  volumes:
+  - name: dockersock
+    path: /var/run
+
+volumes:
+- name: dockersock
+  temp: {}
+
+
 ---
 kind: pipeline
 name: wordpress-runtime-5.5
