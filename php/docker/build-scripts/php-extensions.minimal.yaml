@@ -107,12 +107,12 @@
       - "--enable-memcached-msgpack"
       - "--enable-memcached-json"
 
-- name: imagick
-  type: pecl
-  version: 3.4.4
-  build:
-    depends:
-      - "libmagickwand-dev"
+#- name: imagick
+#  type: pecl
+#  version: 3.4.4
+#  build:
+#    depends:
+#      - "libmagickwand-dev"
 
 - name: redis
   type: pecl

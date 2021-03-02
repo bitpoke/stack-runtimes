@@ -102,14 +102,14 @@
 - name: grpc
   type: pecl
   version: 1.31.0
-- name: imagick
-  type: pecl
-  version: 3.4.3
-  depends:
-    - ghostscript
-  build:
-    depends:
-      - "libmagickwand-dev"
+#- name: imagick
+#  type: pecl
+#  version: 3.4.3
+#  depends:
+#    - ghostscript
+#  build:
+#    depends:
+#      - "libmagickwand-dev"
 - name: mailparse
   type: pecl
   version: 3.1.0
