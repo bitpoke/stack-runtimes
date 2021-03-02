@@ -22,3 +22,5 @@ push-wordpress-runtime-bedrock: push-wordpress-runtime-bedrock-build
 
 # Modify build targets for bedrock-php-7.3 so that we build, test and publish bedrock-php-7.3 and bedrock-build-php-7.3 variants
 .build/wordpress-runtime-bedrock-php-7.3: .build/wordpress-runtime-bedrock-build-php-7.3
+
+.build/wordpress-runtime-bedrock-php-8.0: .build/wordpress-runtime-bedrock-build-php-8.0
