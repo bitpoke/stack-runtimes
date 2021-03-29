@@ -75,7 +75,7 @@
 # install apcu before serializers so that they detect and enable support for it
 - name: apcu
   type: pecl
-  version: 5.1.18
+  version: 5.1.20
   priority: 30
 - name: apc
   pecl_name: apcu_bc
@@ -104,7 +104,7 @@
   version: 1.31.0
 #- name: imagick
 #  type: pecl
-#  version: 3.4.3
+#  version: 3.4.4
 #  depends:
 #    - ghostscript
 #  build:
@@ -132,7 +132,7 @@
       - 'libpcre3-dev'
 - name: redis
   type: pecl
-  version: 5.3.1
+  version: 5.3.4
   build:
     args:
       - "--enable-redis-igbinary"

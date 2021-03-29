@@ -1,4 +1,4 @@
-ARG PHP_VERSION=7.3.25
+ARG PHP_VERSION=7.3.27
 FROM php:${PHP_VERSION}-fpm-buster as php
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV PATH="/usr/local/docker/bin:${PATH}"
