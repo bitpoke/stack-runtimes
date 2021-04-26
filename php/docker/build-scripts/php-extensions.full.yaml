@@ -18,10 +18,12 @@
       - "--with-jpeg=/usr/include/"
       - "--with-png=/usr/include/"
       - "--with-webp=/usr/include/"
+      - "--with-freetype=/usr/include/"
     depends:
       - libjpeg62-turbo-dev
       - libpng-dev
       - libwebp-dev
+      - libfreetype6-dev
 - name: imap
   build:
     depends:
