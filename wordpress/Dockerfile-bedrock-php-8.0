@@ -1,4 +1,4 @@
-ARG PHP_BASE_IMAGE=quay.io/presslabs/php-runtime:8.0
+ARG PHP_BASE_IMAGE=docker.io/bitpoke/php-runtime:8.0
 FROM ${PHP_BASE_IMAGE} as bedrock
 
 ENV WP_CLI_VERSION=2.2.0

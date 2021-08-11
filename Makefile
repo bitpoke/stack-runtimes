@@ -1,15 +1,15 @@
 include common.Makefile
 
-REGISTRY ?= quay.io/presslabs
-PHP_VERSION ?= 7.4.11
-WORDPRESS_VERSION ?= 5.5.1
+REGISTRY ?= docker.io/bitpoke
+PHP_VERSION ?= 7.4.22
+WORDPRESS_VERSION ?= 5.8
 
 ifndef CI
 TAG_SUFFIX ?= canary
 endif
 BUILD_TAG ?= build
 
-# The PHP series for which this version of WordPress builds the default tag, eg. quay.io/presslabs/wordpress-runtime:5.2.2
+# The PHP series for which this version of WordPress builds the default tag, eg. docker.io/bitpoke/wordpress-runtime:5.2.2
 WORDPRESS_PHP_SERIES := $(shell ./hack/wordpress-php-series $(WORDPRESS_VERSION))
 
 # The PHP series for which to build the default bedrock tag

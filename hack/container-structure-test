@@ -25,6 +25,6 @@ cd ${PROJECT_ROOT}
 
 exec docker run --rm -w /workspace \
     -v $(pwd):/workspace \
-    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /workspace/docker.sock:/var/run/docker.sock \
     gcr.io/gcp-runtimes/container-structure-test:v1.8.0 \
     "$@"
