@@ -71,7 +71,7 @@
 # install apcu before serializers so that they detect and enable support for it
 - name: apcu
   type: pecl
-  version: 5.1.20
+  version: 5.1.21
   priority: 30
 - name: apc
   phpMaxVersion: 8.0
@@ -82,21 +82,21 @@
 # install serializers to make them available for the rest of the extensions
 - name: igbinary
   type: pecl
-  version: 3.2.2
+  version: 3.2.6
 - name: msgpack
   type: pecl
   version: 2.1.2
 
 - name: zstd
   type: pecl
-  version: 0.10.0
+  version: 0.11.0
   build:
     depends:
       - "libzstd-dev"
 
 - name: mailparse
   type: pecl
-  version: 3.1.1
+  version: 3.1.2
 
 - name: memcached
   type: pecl
@@ -112,7 +112,7 @@
 
 - name: imagick
   type: pecl
-  version: 3.5.0
+  version: 3.5.1
   build:
     depends:
       - "libmagickwand-dev"
