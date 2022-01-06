@@ -112,14 +112,14 @@
 
 - name: imagick
   type: pecl
-  version: 3.5.1
+  version: 3.6.0
   build:
     depends:
       - "libmagickwand-dev"
 
 - name: redis
   type: pecl
-  version: 5.3.4
+  version: 5.3.5
   build:
     args:
       - "--enable-redis-igbinary"

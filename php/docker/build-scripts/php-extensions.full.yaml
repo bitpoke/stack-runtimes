@@ -107,7 +107,7 @@
   version: 1.41.0
 - name: imagick
   type: pecl
-  version: 3.5.1
+  version: 3.6.0
   depends:
     - ghostscript
   build:
@@ -135,7 +135,7 @@
       - 'libpcre3-dev'
 - name: redis
   type: pecl
-  version: 5.3.4
+  version: 5.3.5
   build:
     args:
       - "--enable-redis-igbinary"
