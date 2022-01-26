@@ -6,13 +6,7 @@ TEST_TMP_DIR=""
 : "${TEST_HOSTNAME:=localhost}"
 
 docker-compose() {
-    local _orig="$(which docker-compose)"
-    if [ -f "${_orig}" ] ; then
-        cd "$TEST_TMP_DIR" && ${_orig} "$@"
-    else
-        echo "Could not find docker-compose." >&2
-        return 1
-    fi
+    cd "$TEST_TMP_DIR" && docker compose "$@"
 }
 
 wp() {

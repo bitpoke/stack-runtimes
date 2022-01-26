@@ -24,7 +24,7 @@ PROJECT_ROOT=$(dirname "${BASH_SOURCE}")/..
 cd ${PROJECT_ROOT}
 
 exec docker run --rm -w /workspace \
+    -e DOCKER_HOST \
     -v $(pwd):/workspace \
-    -v /workspace/docker.sock:/var/run/docker.sock \
     gcr.io/gcp-runtimes/container-structure-test:v1.8.0 \
     "$@"

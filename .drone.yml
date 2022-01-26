@@ -10,12 +10,13 @@ steps:
 - &step
   name: setup docker
   pull: always
-  image: docker.io/bitpoke/build:v0.3.0-3.g7069e76
+  image: docker.io/bitpoke/build:v0.8.0
   environment: &baseEnv
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
     TEST_HOSTNAME: docker
+    DOCKER_HOST: tcp://docker:2375
   commands:
-    - dockerize -wait unix:///workspace/docker.sock -timeout 10s
+    - dockerize -wait http://docker:2375/_ping -timeout 30s
     - docker info
     - make -C php pull-$DRONE_STAGE_NAME
 
@@ -36,20 +37,18 @@ steps:
   pull: default
   environment:
     <<: *baseEnv
-    DOCKER_USER:
-      from_secret: DOCKER_USER
+    DOCKER_USERNAME: bitpokebot
     DOCKER_PASSWORD:
       from_secret: DOCKER_PASSWORD
   commands:
-    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" docker.io
+    - /usr/local/bin/setup-credentials-helper.sh
     - make -C php push-$DRONE_STAGE_NAME
 
 services:
 - name: docker
-  image: docker:20.10.8-dind
-  privileged: true
-  commands:
-    - /usr/local/bin/dockerd-entrypoint.sh dockerd --host "unix:///workspace/docker.sock" --storage-driver overlay2 --log-level error
+  image: docker:20.10.8-dind-rootless
+  environment:
+    DOCKER_TLS_CERTDIR: ""
 ---
 kind: pipeline
 name: php-runtime-7.4
@@ -62,12 +61,13 @@ steps:
 - &step
   name: setup docker
   pull: always
-  image: docker.io/bitpoke/build:v0.3.0-3.g7069e76
+  image: docker.io/bitpoke/build:v0.8.0
   environment: &baseEnv
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
     TEST_HOSTNAME: docker
+    DOCKER_HOST: tcp://docker:2375
   commands:
-    - dockerize -wait unix:///workspace/docker.sock -timeout 10s
+    - dockerize -wait http://docker:2375/_ping -timeout 30s
     - docker info
     - make -C php pull-$DRONE_STAGE_NAME
 
@@ -88,20 +88,18 @@ steps:
   pull: default
   environment:
     <<: *baseEnv
-    DOCKER_USER:
-      from_secret: DOCKER_USER
+    DOCKER_USERNAME: bitpokebot
     DOCKER_PASSWORD:
       from_secret: DOCKER_PASSWORD
   commands:
-    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" docker.io
+    - /usr/local/bin/setup-credentials-helper.sh
     - make -C php push-$DRONE_STAGE_NAME
 
 services:
 - name: docker
-  image: docker:20.10.8-dind
-  privileged: true
-  commands:
-    - /usr/local/bin/dockerd-entrypoint.sh dockerd --host "unix:///workspace/docker.sock" --storage-driver overlay2 --log-level error
+  image: docker:20.10.8-dind-rootless
+  environment:
+    DOCKER_TLS_CERTDIR: ""
 
 ---
 kind: pipeline
@@ -118,12 +116,13 @@ steps:
 - &step
   name: setup docker
   pull: always
-  image: docker.io/bitpoke/build:v0.3.0-3.g7069e76
+  image: docker.io/bitpoke/build:v0.8.0
   environment: &baseEnv
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
     TEST_HOSTNAME: docker
+    DOCKER_HOST: tcp://docker:2375
   commands:
-    - dockerize -wait unix:///workspace/docker.sock -timeout 10s
+    - dockerize -wait http://docker:2375/_ping -timeout 30s
     - docker info
     - make -C wordpress pull-$DRONE_STAGE_NAME
 
@@ -144,20 +143,18 @@ steps:
   pull: default
   environment:
     <<: *baseEnv
-    DOCKER_USER:
-      from_secret: DOCKER_USER
+    DOCKER_USERNAME: bitpokebot
     DOCKER_PASSWORD:
       from_secret: DOCKER_PASSWORD
   commands:
-    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" docker.io
+    - /usr/local/bin/setup-credentials-helper.sh
     - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
 - name: docker
-  image: docker:20.10.8-dind
-  privileged: true
-  commands:
-    - /usr/local/bin/dockerd-entrypoint.sh dockerd --host "unix:///workspace/docker.sock" --storage-driver overlay2 --log-level error
+  image: docker:20.10.8-dind-rootless
+  environment:
+    DOCKER_TLS_CERTDIR: ""
 
 ---
 kind: pipeline
@@ -174,12 +171,13 @@ steps:
 - &step
   name: setup docker
   pull: always
-  image: docker.io/bitpoke/build:v0.3.0-3.g7069e76
+  image: docker.io/bitpoke/build:v0.8.0
   environment: &baseEnv
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
     TEST_HOSTNAME: docker
+    DOCKER_HOST: tcp://docker:2375
   commands:
-    - dockerize -wait unix:///workspace/docker.sock -timeout 10s
+    - dockerize -wait http://docker:2375/_ping -timeout 30s
     - docker info
     - make -C wordpress pull-$DRONE_STAGE_NAME
 
@@ -200,20 +198,18 @@ steps:
   pull: default
   environment:
     <<: *baseEnv
-    DOCKER_USER:
-      from_secret: DOCKER_USER
+    DOCKER_USERNAME: bitpokebot
     DOCKER_PASSWORD:
       from_secret: DOCKER_PASSWORD
   commands:
-    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" docker.io
+    - /usr/local/bin/setup-credentials-helper.sh
     - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
 - name: docker
-  image: docker:20.10.8-dind
-  privileged: true
-  commands:
-    - /usr/local/bin/dockerd-entrypoint.sh dockerd --host "unix:///workspace/docker.sock" --storage-driver overlay2 --log-level error
+  image: docker:20.10.8-dind-rootless
+  environment:
+    DOCKER_TLS_CERTDIR: ""
 
 ---
 kind: pipeline
@@ -230,12 +226,13 @@ steps:
 - &step
   name: setup docker
   pull: always
-  image: docker.io/bitpoke/build:v0.3.0-3.g7069e76
+  image: docker.io/bitpoke/build:v0.8.0
   environment: &baseEnv
     TAG_SUFFIX: ${DRONE_BRANCH/master/}
     TEST_HOSTNAME: docker
+    DOCKER_HOST: tcp://docker:2375
   commands:
-    - dockerize -wait unix:///workspace/docker.sock -timeout 10s
+    - dockerize -wait http://docker:2375/_ping -timeout 30s
     - docker info
     - make -C wordpress pull-$DRONE_STAGE_NAME
 
@@ -256,18 +253,16 @@ steps:
   pull: default
   environment:
     <<: *baseEnv
-    DOCKER_USER:
-      from_secret: DOCKER_USER
+    DOCKER_USERNAME: bitpokebot
     DOCKER_PASSWORD:
       from_secret: DOCKER_PASSWORD
   commands:
-    - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD" docker.io
+    - /usr/local/bin/setup-credentials-helper.sh
     - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
 - name: docker
-  image: docker:20.10.8-dind
-  privileged: true
-  commands:
-    - /usr/local/bin/dockerd-entrypoint.sh dockerd --host "unix:///workspace/docker.sock" --storage-driver overlay2 --log-level error
+  image: docker:20.10.8-dind-rootless
+  environment:
+    DOCKER_TLS_CERTDIR: ""
 
