@@ -62,6 +62,7 @@
 
 # Install mcrypt for backward compatibility
 - name: mcrypt
+  phpMaxVersion: 8.1
   version: 1.0.4
   type: pecl
   build:
@@ -82,10 +83,18 @@
 # install serializers to make them available for the rest of the extensions
 - name: igbinary
   type: pecl
-  version: 3.2.6
+  version: 3.2.7
+
 - name: msgpack
+  phpMinVersion: 7.4
+  phpMaxVersion: 8.1
   type: pecl
   version: 2.1.2
+
+- name: msgpack
+  phpMinVersion: 8.1
+  type: pecl
+  version: 2.2.0RC1
 
 - name: zstd
   type: pecl
@@ -99,6 +108,21 @@
   version: 3.1.2
 
 - name: memcached
+  phpMaxVersion: 8.1
+  type: pecl
+  version: 3.1.5
+  build:
+    depends:
+      - "libmemcached-dev"
+      - "zlib1g-dev"
+    args:
+      - "--enable-memcached-igbinary"
+      - "--enable-memcached-msgpack"
+      - "--enable-memcached-json"
+
+- name: memcached
+  src: https://github.com/php-memcached-dev/php-memcached/archive/d3b8ce13f13cee3017aa8a00a0cfb2e7709154d8.tar.gz
+  phpMinVersion: 8.1
   type: pecl
   version: 3.1.5
   build:
@@ -112,14 +136,14 @@
 
 - name: imagick
   type: pecl
-  version: 3.6.0
+  version: 3.7.0
   build:
     depends:
       - "libmagickwand-dev"
 
 - name: redis
   type: pecl
-  version: 5.3.5
+  version: 5.3.6
   build:
     args:
       - "--enable-redis-igbinary"
