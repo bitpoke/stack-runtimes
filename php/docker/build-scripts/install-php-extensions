@@ -60,12 +60,26 @@ function install_extension($name, $buildArgs = array()) {
     run(...$cmd);
 }
 
-function install_pecl_extension(string $ext, string $name, string $version, string $priority, $buildArgs = array()) {
+function install_pecl_extension(string $ext, string $name, string $version, string $priority, $buildArgs = array(), $source = "") {
     global $dryRun;
     $cwd = getcwd();
-    $extDir = pecl_temp_dir() . "/$ext";
+    $peclTempDir = pecl_temp_dir();
+    $extDir = $peclTempDir . "/$ext";
+    $extArchive = $peclTempDir . DIRECTORY_SEPARATOR . basename($source);
 
-    run("pecl", "install", "--onlyreqdeps", "--nobuild", "$ext-$version");
+    if ( ! is_dir( $peclTempDir ) ) {
+        run("mkdir", $peclTempDir);
+    }
+
+    if (empty($source)) {
+        run("pecl", "install", "--onlyreqdeps", "--nobuild", "$ext-$version");
+    } else {
+        run("curl", "-sL", "-o", $extArchive, $source);
+        if ( ! is_dir( $extDir ) ) {
+            run("mkdir", $extDir);
+        }
+        run("tar", "-C", $extDir, "--strip-components=1", "-zxf", $extArchive);
+    }
     changeDir($extDir);
     run("phpize");
     run("./configure", ...$buildArgs);
@@ -78,6 +92,7 @@ function install_pecl_extension(string $ext, string $name, string $version, stri
 function cleanup($buildDeps) {
     $libs = run('find', PHP_EXTENSION_DIR,'-type', 'f', '-name', '*.so');
     $pkgs = array();
+    $peclTempDir = pecl_temp_dir();
 
     $libFiles = array();
     foreach ( $libs as $lib ) {
@@ -101,6 +116,7 @@ function cleanup($buildDeps) {
 
     run('apt-mark', 'manual', ...$pkgs);
     run('apt-get', 'autoremove', '-y', '--purge', ...$buildDeps);
+    run('rm', '-rf', $peclTempDir);
 }
 
 function main() {
@@ -152,7 +168,8 @@ function main() {
             $peclName = @$extension["pecl_name"] ?: $name;
             $peclVersion = @$extension["version"] ?: "stable";
             $priority = @$extension["priority"] ?: "50";
-            install_pecl_extension($peclName, $name, $peclVersion, $priority, $buildArgs);
+            $source = @$extension["src"] ?: "";
+            install_pecl_extension($peclName, $name, $peclVersion, $priority, $buildArgs, $source);
             break;
         default:
             install_extension($name, $buildArgs);
