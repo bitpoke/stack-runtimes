@@ -6,7 +6,7 @@ ENV PHP_VERSION=${PHP_VERSION}
 ENV PORT=8080
 ENV DOCUMENT_ROOT=/app/html
 
-ENV COMPOSER_VERSION=1.9.1
+ENV COMPOSER_VERSION=1.10.25
 ENV SUPERVISORD_VERSION=0.6.3
 ENV DOCKERIZE_VERSION=2.1.0
 # https://github.com/grpc/grpc/issues/13412
@@ -47,7 +47,7 @@ RUN set -ex \
     && chown www-data:www-data ${COMPOSER_HOME} ${COMPOSER_CACHE_DIR} \
     && chmod 777 ${COMPOSER_HOME} ${COMPOSER_CACHE_DIR} \
     && /usr/local/docker/build-scripts/install-composer \
-    && composer global require --prefer-dist hirak/prestissimo 0.3.9 \
+    && composer global require --prefer-dist hirak/prestissimo 0.3.10 \
     && /usr/local/docker/build-scripts/install-dockerize \
     && /usr/local/docker/build-scripts/install-supervisord \
     && /usr/local/docker/build-scripts/install-php-extensions /usr/local/docker/build-scripts/php-extensions.minimal.yaml \
