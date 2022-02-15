@@ -31,3 +31,16 @@ push-wordpress-runtime-bedrock: push-wordpress-runtime-bedrock-build
 
 wordpress-runtime-bedrock-php-8.0: wordpress-runtime-bedrock-build-php-8.0
 push-wordpress-runtime-bedrock-php-8.0: push-wordpress-runtime-bedrock-build-php-8.0
+
+# Modify build targets for bedrock-php-8.1 so that we build, test and publish bedrock-php-8.1 and bedrock-build-php-8.1 variants
+.build/wordpress-runtime-bedrock-build-php-8.1: .build/wordpress-runtime-bedrock-php-8.1
+.build/wordpress-runtime-bedrock-build-php-8.1: BASE_IMAGE := local.build/wordpress-runtime-bedrock-php-8.1
+.build/wordpress-runtime-bedrock-build-php-8.1: DOCKER_BUILD := docker build
+
+.build/tag-wordpress-runtime-bedrock-build-php-8.1: .build/tag-wordpress-runtime-bedrock-php-8.1
+
+.build/test-wordpress-runtime-bedrock-build-php-8.1: .build/test-wordpress-runtime-bedrock-build-php-8.1 ;
+
+wordpress-runtime-bedrock-php-8.1: wordpress-runtime-bedrock-build-php-8.1
+push-wordpress-runtime-bedrock-php-8.1: push-wordpress-runtime-bedrock-build-php-8.1
+
