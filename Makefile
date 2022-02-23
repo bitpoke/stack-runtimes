@@ -1,7 +1,7 @@
 include common.Makefile
 
 REGISTRY ?= docker.io/bitpoke
-PHP_VERSION ?= 7.4.27
+PHP_VERSION ?= 7.4.28
 WORDPRESS_VERSION ?= 5.9
 
 ifndef CI
