@@ -2,7 +2,7 @@ include common.Makefile
 
 REGISTRY ?= docker.io/bitpoke
 PHP_VERSION ?= 7.4.28
-WORDPRESS_VERSION ?= 5.9
+WORDPRESS_VERSION ?= 5.9.1
 
 ifndef CI
 TAG_SUFFIX ?= canary
