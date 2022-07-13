@@ -71,9 +71,6 @@ define( 'NONCE_SALT',       getenv( 'NONCE_SALT' ) ?: 'put your unique phrase he
  */
 $table_prefix = getenv('DB_PREFIX') ?: 'wp_';
 
-define( 'WP_HOME', rtrim( getenv( 'WP_HOME' ) ?: 'http://' . $_SERVER['HTTP_HOST'], '/' ) );
-define( 'WP_SITEURL', rtrim( getenv( 'WP_SITEURL' ), '/' ) ?: WP_HOME . '/wp' );
-
 /**
  * Allow WordPress to detect HTTPS when used behind a reverse proxy or a load balancer
  * See https://codex.wordpress.org/Function_Reference/is_ssl#Notes
@@ -83,10 +80,21 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
 }
 
 $user_config = dirname( __DIR__ ) . '/config/wp-config.php';
-
 if ( file_exists( $user_config ) ) {
     require_once $user_config;
 }
+
+$scheme = 'http://';
+if ( 'on' === $_SERVER['HTTPS'] ) {
+	$scheme = 'https://';
+}
+if ( ! defined( 'WP_HOME' ) ) {
+	define( 'WP_HOME', rtrim( getenv( 'WP_HOME' ) ?: $scheme . $_SERVER['HTTP_HOST'], '/' ) );
+}
+if ( ! defined( 'WP_SITEURL' ) ) {
+	define( 'WP_SITEURL', rtrim( getenv( 'WP_SITEURL' ), '/' ) ?: WP_HOME . '/wp' );
+}
+unset( $scheme );
 
 if ( ! defined( 'CONTENT_DIR' ) ) {
 	define( 'CONTENT_DIR', '/wp-content' );
