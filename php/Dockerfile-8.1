@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.1.11
+ARG PHP_VERSION=8.1.12
 FROM php:${PHP_VERSION}-fpm-buster as php
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV PATH="/usr/local/docker/bin:${PATH}"
@@ -6,12 +6,9 @@ ENV PHP_VERSION=${PHP_VERSION}
 ENV PORT=8080
 ENV DOCUMENT_ROOT=/app/html
 
-ENV COMPOSER_VERSION=2.2.6
+ENV COMPOSER_VERSION=2.2.18
 ENV SUPERVISORD_VERSION=0.6.3
 ENV DOCKERIZE_VERSION=2.1.0
-# https://github.com/grpc/grpc/issues/13412
-ENV GRPC_ENABLE_FORK_SUPPORT=1
-ENV GRPC_POLL_STRATEGY=epoll1
 # keep wp-cli happy
 ENV PAGER=cat
 
