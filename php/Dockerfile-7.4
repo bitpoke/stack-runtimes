@@ -25,10 +25,10 @@ RUN set -ex \
     && apt-get update \
     && apt-get install --no-install-recommends -y gnupg \
     && curl -s https://openresty.org/package/pubkey.gpg | apt-key add - \
-    && echo "deb http://openresty.org/package/debian stretch openresty" > /etc/apt/sources.list.d/openresty.list \
+    && echo "deb http://openresty.org/package/debian buster openresty" > /etc/apt/sources.list.d/openresty.list \
     && apt-get update \
     && apt-get install --no-install-recommends -y \
-        msmtp unzip openresty=1.13* openresty-debug=1.13* libyaml-0-2 libyaml-dev \
+        msmtp unzip openresty=1.21* openresty-debug=1.21* libyaml-0-2 libyaml-dev \
         less git openssh-client procps \
     # we need yaml support for installing extensions
     && pecl install yaml \
