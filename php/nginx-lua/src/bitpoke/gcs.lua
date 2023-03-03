@@ -1,3 +1,4 @@
+-- Copyright 2023 Bitpoke Soft SRL.
 -- Copyright 2018 Pressinfra SRL.
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,24 +50,24 @@ local function get_oauth2_token()
     ngx.log(ngx.INFO, "Fetching a new google ouath2 access_token")
     local key = google_credentials['private_key']
     local jwt_obj = {
-        header={
-            alg="RS256",
-            typ="JWT"
+        header = {
+            alg = "RS256",
+            typ = "JWT"
         },
-        payload={
-            iss=google_credentials['client_email'],
-            scope="https://www.googleapis.com/auth/devstorage.read_only",
-            aud="https://www.googleapis.com/oauth2/v4/token",
-            exp=ngx.time() + 3600,
-            iat=ngx.time()
+        payload = {
+            iss = google_credentials['client_email'],
+            scope = "https://www.googleapis.com/auth/devstorage.read_only",
+            aud = "https://www.googleapis.com/oauth2/v4/token",
+            exp = ngx.time() + 3600,
+            iat = ngx.time()
         }
     }
 
     local jwt_assertion = jwt:sign(key, jwt_obj)
     local ctx = {}
     local req_body = ngx.encode_args({
-        grant_type="urn:ietf:params:oauth:grant-type:jwt-bearer",
-        assertion=jwt_assertion
+        grant_type = "urn:ietf:params:oauth:grant-type:jwt-bearer",
+        assertion = jwt_assertion
     })
 
     local res = ngx.location.capture(OAUTH2_INTERNAL_TOKEN_ENDPOINT, {
@@ -92,18 +93,18 @@ local function get_access_token()
 end
 
 function _M.setup()
-    local key_file = key_file or ''
     local mlcache = require "resty.mlcache"
 
     local cache, err = mlcache.new("gcs_access_tokens", "cache_dict", {
-        lru_size = 10,    -- size of the L1 (Lua VM) cache
-        ttl      = 300,   -- 1h ttl for hits
+        lru_size = 10, -- size of the L1 (Lua VM) cache
+        ttl      = 300, -- 1h ttl for hits
     })
-    if err then
+    if err == nil then
         ngx.log(ngx.ERR, "Failed setting up cache: ", err)
         return
     end
 
+    ---@diagnostic disable-next-line: redefined-local
     local token, err = cache:get("gcs_access_token", nil, get_access_token)
     if err then
         ngx.log(ngx.ERR, "Failed fetching access token:", err)
@@ -116,14 +117,14 @@ end
 function _M.init()
     local google_credentials = nil
     if "" ~= (os.getenv("GOOGLE_CREDENTIALS") or "") then
-        google_credentials = cjson.decode(os.getenv("GOOGLE_CREDENTIALS"))
+        google_credentials = cjson.decode(os.getenv("GOOGLE_CREDENTIALS") or "")
     else
         local well_known_gac_file = ((os.getenv("HOME") or "/var/www") .. "/.config/gcloud/google_application_credentials.json")
         local gac_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or well_known_gac_file
         local f, err = io.open(gac_file, "rb")
         if err and gac_file ~= well_known_gac_file then
             ngx.log(ngx.WARN, "Could not configure Google Application Credentials: ", err)
-        elseif not err then
+        elseif not err and f ~= nil then
             google_credentials = cjson.decode(f:read("*all"))
             f:close()
         end

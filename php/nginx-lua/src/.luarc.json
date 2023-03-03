@@ -1,0 +1,8 @@
+{
+    "diagnostics.globals": [
+        "ngx", "google_credentials"
+    ],
+    "workspace.library": [
+        "${3rd}/OpenResty/library"
+    ]
+}
