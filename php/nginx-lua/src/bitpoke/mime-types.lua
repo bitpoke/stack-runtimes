@@ -1,3 +1,4 @@
+-- Copyright 2023 Bitpoke Soft SRL.
 -- Copyright 2019 Pressinfra SRL.
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,8 +48,14 @@ function _M.setup()
         ["ico"] = "image/x-icon",
         ["jng"] = "image/x-jng",
         ["bmp"] = "image/x-ms-bmp",
-        -- misc
+        -- fonts
+        ["ttf"] = "application/x-font-ttf",
+        ["ttc"] = "application/x-font-ttf",
+        ["otf"] = "application/x-font-otf",
         ["woff"] = "application/font-woff",
+        ["woff2"] = "application/font-woff2",
+        ["eot"] = "application/vnd.ms-fontobject",
+        -- misc
         ["jar"] = "application/java-archive",
         ["war"] = "application/java-archive",
         ["ear"] = "application/java-archive",
@@ -64,7 +71,6 @@ function _M.setup()
         ["kml"] = "application/vnd.google-earth.kml+xml",
         ["kmz"] = "application/vnd.google-earth.kmz",
         ["xls"] = "application/vnd.ms-excel",
-        ["eot"] = "application/vnd.ms-fontobject",
         ["ppt"] = "application/vnd.ms-powerpoint",
         ["odg"] = "application/vnd.oasis.opendocument.graphics",
         ["odp"] = "application/vnd.oasis.opendocument.presentation",
