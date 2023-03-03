@@ -1,4 +1,4 @@
--- vim: st=4 sts=4 sw=4 et:
+-- vim: ts=4 sts=4 sw=4 et:
 
 local ERR          = ngx.ERR
 local WARN         = ngx.WARN
@@ -20,6 +20,7 @@ local setmetatable = setmetatable
 
 
 local INDEX_KEY        = "lua-resty-ipc:index"
+local FORCIBLE_KEY     = "lua-resty-ipc:forcible"
 local POLL_SLEEP_RATIO = 2
 
 
@@ -104,9 +105,19 @@ function _M:broadcast(channel, data)
         return nil, "failed to increment index: " .. err
     end
 
-    local ok, err = self.dict:set(idx, marshalled_event)
+    local ok, err, forcible = self.dict:set(idx, marshalled_event)
     if not ok then
         return nil, "failed to insert event in shm: " .. err
+    end
+
+    if forcible then
+        -- take note that eviction has started
+        -- we repeat this flagging to avoid this key from ever being
+        -- evicted itself
+        local ok, err = self.dict:set(FORCIBLE_KEY, true)
+        if not ok then
+            return nil, "failed to set forcible flag in shm: " .. err
+        end
     end
 
     return true
@@ -125,17 +136,17 @@ function _M:poll(timeout)
         error("timeout must be a number", 2)
     end
 
-    local idx, err = self.dict:get(INDEX_KEY)
+    local shm_idx, err = self.dict:get(INDEX_KEY)
     if err then
         return nil, "failed to get index: " .. err
     end
 
-    if idx == nil then
+    if shm_idx == nil then
         -- no events to poll yet
         return true
     end
 
-    if type(idx) ~= "number" then
+    if type(shm_idx) ~= "number" then
         return nil, "index is not a number, shm tampered with"
     end
 
@@ -143,9 +154,27 @@ function _M:poll(timeout)
         timeout = 0.3
     end
 
+    if self.idx == 0 then
+        local forcible, err = self.dict:get(FORCIBLE_KEY)
+        if err then
+            return nil, "failed to get forcible flag from shm: " .. err
+        end
+
+        if forcible then
+            -- shm lru eviction occurred, we are likely a new worker
+            -- skip indexes that may have been evicted and resume current
+            -- polling idx
+            self.idx = shm_idx - 1
+        end
+
+    else
+        -- guard: self.idx <= shm_idx
+        self.idx = min(self.idx, shm_idx)
+    end
+
     local elapsed = 0
 
-    for _ = self.idx, idx - 1 do
+    for _ = self.idx, shm_idx - 1 do
         -- fetch event from shm with a retry policy in case
         -- we run our :get() in between another worker's
         -- :incr() and :set()

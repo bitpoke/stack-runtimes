@@ -1,0 +1,135 @@
+=encoding utf-8
+
+
+=head1 Changelog
+
+
+This file only calls out major changes. Please see [the list of Git commits](
+https://github.com/knyar/nginx-lua-prometheus/commits/master) for the full list
+of changes.
+
+
+=head2 0.20221218
+
+
+
+=over
+
+
+=item *
+
+Added escaping of newline characters in label values (#145).
+
+=item *
+
+Improved detection of LRU evictions (#147, #148).
+
+=item *
+
+Per-worker metric name lookup tables now have a bounded size aimed at preventing
+memory leaking in environments with high metric churn (#151).
+
+
+=back
+
+
+=head2 0.20220527
+
+
+Performance optimization aimed at decreasing impact that metric collection has
+on other requests (#139).
+
+
+=head2 0.20220127
+
+
+Performance optimization of metric collection (#131).
+
+
+=head2 0.20210206
+
+
+Bucket label values no longer have leading and trailing zeroes (#119).
+
+
+=head2 0.20201218
+
+
+Histogram metrics can now be reset (#112).
+
+
+=head2 0.20201118
+
+
+Allow utf8 label values (#110).
+
+
+=head2 0.20200523
+
+
+
+=over
+
+
+=item *
+
+Scalability improvements that allow tracking a larger number of metrics
+without impacting nginx performance (#82).
+
+=item *
+
+Simplified library initialization, moving all of it to C<init_worker_by_lua_block>.
+
+=item *
+
+Error metric name is now configurable (#91).
+
+
+=back
+
+
+=head2 0.20200420
+
+
+This is a significant release that includes counter performance improvements.
+
+B<BREAKING CHANGE>: this release requires additional per-worker initialization
+in the C<init_worker_by_lua_block> section of nginx configuration.
+
+
+=over
+
+
+=item *
+
+Added support for incrementing and decrementing gauges (#52).
+
+=item *
+
+Added del and reset for gauge and counter metrics (#56).
+
+=item *
+
+Added per-worker lua counters that allow incrementing counter metrics
+without locking the dictionary (#75).
+
+
+=back
+
+
+=head2 0.20181120
+
+
+Added stream module support (#42).
+
+
+=head2 0.20171117
+
+
+Improved performance of metric collection (#25).
+
+
+=head2 0.1-20170610
+
+
+Initial version of the library.

@@ -22,9 +22,8 @@
 --    used when labels were declared). "le" label for histogram metrics always
 --    goes last;
 --  * bucket boundaries (which are exposed as values of the "le" label) are
---    presented as floating point numbers with leading and trailing zeroes.
---    Number of of zeroes is determined for each bucketer automatically based on
---    bucket boundaries;
+--    stored as floating point numbers with leading and trailing zeroes,
+--    and those zeros would be removed just before we expose the metrics;
 --  * internally "+Inf" bucket is stored as "Inf" (to make it appear after
 --    all numeric buckets), and gets replaced by "+Inf" just before we
 --    expose the metrics.
@@ -40,7 +39,14 @@
 --   m1_count{site="site1"}
 --   m1_sum{site="site1"}
 --
--- "Inf" will be replaced by "+Inf" while publishing metrics.
+-- And when exposing the metrics, their names will be changed to:
+--
+--   m1_bucket{site="site1",le="0.00005"}
+--   m1_bucket{site="site1",le="10"}
+--   m1_bucket{site="site1",le="1000"}
+--   m1_bucket{site="site1",le="+Inf"}
+--   m1_count{site="site1"}
+--   m1_sum{site="site1"}
 --
 -- You can find the latest version and documentation at
 -- https://github.com/knyar/nginx-lua-prometheus
@@ -50,6 +56,16 @@
 -- increments. Copied from https://github.com/Kong/lua-resty-counter
 local resty_counter_lib = require("prometheus_resty_counter")
 local key_index_lib = require("prometheus_keys")
+local ngx = ngx
+local ngx_re_match = ngx.re.match
+local ngx_re_gsub = ngx.re.gsub
+local error = error
+local type = type
+local get_phase = ngx.get_phase
+local ngx_sleep = ngx.sleep
+local select = select
+
+local YIELD_ITERATIONS = 200
 
 local Prometheus = {}
 local mt = { __index = Prometheus }
@@ -63,11 +79,21 @@ local TYPE_LITERAL = {
   [TYPE_HISTOGRAM] = "histogram",
 }
 
+local can_yield_phases = {
+    rewrite = true,
+    access = true,
+    content = true,
+    timer = true
+}
+
 -- Default name for error metric incremented by this library.
 local DEFAULT_ERROR_METRIC_NAME = "nginx_metric_errors_total"
 
 -- Default value for per-worker counter sync interval (seconds).
 local DEFAULT_SYNC_INTERVAL = 1
+
+-- Default max size of lookup table
+local DEFAULT_LOOKUP_MAX_SIZE = 1000
 
 -- Default set of latency buckets, 5ms to 10s:
 local DEFAULT_BUCKETS = {0.005, 0.01, 0.02, 0.03, 0.05, 0.075, 0.1, 0.2, 0.3,
@@ -76,12 +102,101 @@ local DEFAULT_BUCKETS = {0.005, 0.01, 0.02, 0.03, 0.05, 0.075, 0.1, 0.2, 0.3,
 -- Prefix for internal shared dictionary items.
 local KEY_INDEX_PREFIX = "__ngx_prom__"
 
+local METRICS_KEY_REGEX = [[(.*[,{]le=")(.*)(".*)]]
+
+local ERR_MSG_COUNTER_NOT_INITIALIZED = "counter not initialized! " ..
+  "Have you called Prometheus:init() from the " ..
+  "init_worker_by_lua_block nginx phase?"
+
+-- Error message that gets logged when the shared dictionary gets full.
+local ERR_MSG_LRU_EVICTION = "Shared dictionary used for prometheus metrics " ..
+  "is full. REPORTED METRIC DATA MIGHT BE INCOMPLETE. Please increase the " ..
+  "size of the dictionary or decrease metric cardinality."
+
+-- Accepted range of byte values for tailing bytes of utf8 strings.
+-- This is defined outside of the validate_utf8_string function as a const
+-- variable to avoid creating and destroying table frequently.
+-- Values in this table (and in validate_utf8_string) are from table 3-7 of
+-- www.unicode.org/versions/Unicode6.2.0/UnicodeStandard-6.2.pdf
+local accept_range = {
+  {lo = 0x80, hi = 0xBF},
+  {lo = 0xA0, hi = 0xBF},
+  {lo = 0x80, hi = 0x9F},
+  {lo = 0x90, hi = 0xBF},
+  {lo = 0x80, hi = 0x8F}
+}
+
+-- Validate utf8 string for label values.
+--
+-- Args:
+--   str: string
+--
+-- Returns:
+--   (bool) whether the input string is a valid utf8 string.
+--   (number) position of the first invalid byte.
+local function validate_utf8_string(str)
+  local i, n = 1, #str
+  local first, byte, left_size, range_idx
+  while i <= n do
+    first = string.byte(str, i)
+    if first >= 0x80 then
+      range_idx = 1
+      if first >= 0xC2 and first <= 0xDF then -- 2 bytes
+        left_size = 1
+      elseif first >= 0xE0 and first <= 0xEF then -- 3 bytes
+        left_size = 2
+        if first == 0xE0 then
+          range_idx = 2
+        elseif first == 0xED then
+          range_idx = 3
+        end
+      elseif first >= 0xF0 and first <= 0xF4 then -- 4 bytes
+        left_size = 3
+        if first == 0xF0 then
+          range_idx = 4
+        elseif first == 0xF4 then
+          range_idx = 5
+        end
+      else
+        return false, i
+      end
+
+      if i + left_size > n then
+        return false, i
+      end
+
+      for j = 1, left_size do
+        byte = string.byte(str, i + j)
+        if byte < accept_range[range_idx].lo or byte > accept_range[range_idx].hi then
+          return false, i
+        end
+        range_idx = 1
+      end
+      i = i + left_size
+    end
+    i = i + 1
+  end
+  return true
+end
+
+-- copy form https://github.com/apache/apisix/blob/release/2.13/apisix/core/table.lua#L50-L58
+local function table_insert_tail(tab, ...)
+    local idx = #tab
+    for i = 1, select('#', ...) do
+        idx = idx + 1
+        tab[idx] = select(i, ...)
+    end
+
+    return idx
+end
+
 -- Generate full metric name that includes all labels.
 --
 -- Args:
 --   name: string
 --   label_names: (array) a list of label keys.
 --   label_values: (array) a list of label values.
+--
 -- Returns:
 --   (string) full metric name.
 local function full_metric_name(name, label_names, label_values)
@@ -90,11 +205,24 @@ local function full_metric_name(name, label_names, label_values)
   end
   local label_parts = {}
   for idx, key in ipairs(label_names) do
-    local label_value = (string.format("%s", label_values[idx])
-      :gsub("[^\032-\126]", "")  -- strip non-printable characters
-      :gsub("\\", "\\\\")
-      :gsub('"', '\\"'))
-    table.insert(label_parts, key .. '="' .. label_value .. '"')
+    local label_value
+    if type(label_values[idx]) == "string" then
+      local valid, pos = validate_utf8_string(label_values[idx])
+      if not valid then
+        label_value = string.sub(label_values[idx], 1, pos - 1)
+                        :gsub("\\", "\\\\")
+                        :gsub('"', '\\"')
+                        :gsub("\n", "\\n")
+      else
+        label_value = label_values[idx]
+                        :gsub("\\", "\\\\")
+                        :gsub('"', '\\"')
+                        :gsub("\n", "\\n")
+      end
+    else
+      label_value = tostring(label_values[idx])
+    end
+    table_insert_tail(label_parts, key .. '="' .. label_value .. '"')
   end
   return name .. "{" .. table.concat(label_parts, ",") .. "}"
 end
@@ -175,12 +303,41 @@ local function construct_bucket_format(buckets)
   for _, bucket in ipairs(buckets) do
     assert(type(bucket) == "number", "bucket boundaries should be numeric")
     -- floating point number with all trailing zeros removed
-    local as_string = string.format("%f", bucket):gsub("0*$", "")
+    local bucket_str = string.format("%f", bucket)
+    local as_string = ngx_re_gsub(bucket_str, "0*$", "", "jo")
+
     local dot_idx = as_string:find(".", 1, true)
     max_order = math.max(max_order, dot_idx - 1)
     max_precision = math.max(max_precision, as_string:len() - dot_idx)
   end
   return "%0" .. (max_order + max_precision + 1) .. "." .. max_precision .. "f"
+end
+
+-- Format bucket format when exposing metrics.
+--
+-- This function removes leading and trailing zeroes from `le` label values.
+--
+-- Args:
+--   key: the metric key
+--
+-- Returns:
+--   (string) the formatted key
+local function fix_histogram_bucket_labels(key)
+  local match, err = ngx_re_match(key, METRICS_KEY_REGEX, "jo")
+  if err then
+    ngx.log(ngx.ERR, "failed to match regex: ", err)
+    return
+  end
+
+  if not match then
+    return key
+  end
+
+  if match[2] == "Inf" then
+    return table.concat({match[1], "+Inf", match[3]})
+  else
+    return table.concat({match[1], tostring(tonumber(match[2])), match[3]})
+  end
 end
 
 -- Return a full metric name for a given metric+label combination.
@@ -210,6 +367,12 @@ local function lookup_or_create(self, label_values)
     return nil, string.format("inconsistent labels count, expected %d, got %d",
                               self.label_count, cnt)
   end
+
+  if self.lookup_size >= self.lookup_max_size then
+    self.lookup_size = 0
+    self.lookup = {}
+  end
+
   local t = self.lookup
   if label_values then
     -- Don't use ipairs here to avoid inner loop generates trace first
@@ -262,7 +425,10 @@ local function lookup_or_create(self, label_values)
     full_name = full_metric_name(self.name, self.label_names, label_values)
   end
   t[LEAF_KEY] = full_name
-  local err = self._key_index:add(full_name)
+
+  self.lookup_size = self.lookup_size + 1
+
+  local err = self._key_index:add(full_name, ERR_MSG_LRU_EVICTION)
   if err then
     return nil, err
   end
@@ -279,22 +445,18 @@ end
 --   value: numeric value to increment by. Can be negative.
 --   label_values: a list of label values, in the same order as label keys.
 local function inc_gauge(self, value, label_values)
-  local k, err, _
+  local k, err, _, forcible
   k, err = lookup_or_create(self, label_values)
   if err then
     self._log_error(err)
     return
   end
 
-  _, err, _ = self._dict:incr(k, value, 0)
-  if err then
-    self._log_error_kv(k, value, err)
+  _, err, forcible = self._dict:incr(k, value, 0)
+  if err or forcible then
+    self._log_error_kv(k, value, err or ERR_MSG_LRU_EVICTION)
   end
 end
-
-local ERR_MSG_COUNTER_NOT_INITIALIZED = "counter not initialized! " ..
-  "Have you called Prometheus:init() from the " ..
-  "init_worker_by_lua_block nginx phase?"
 
 -- Increment a counter metric.
 --
@@ -357,7 +519,11 @@ local function del(self, label_values)
     ngx.sleep(self.parent.sync_interval)
   end
 
-  self._key_index:remove(k)
+  err = self._key_index:remove(k, ERR_MSG_LRU_EVICTION)
+  if err then
+    self._log_error(err)
+  end
+
   _, err = self._dict:delete(k)
   if err then
     self._log_error("Error deleting key: ".. k .. ": " .. err)
@@ -376,15 +542,15 @@ local function set(self, value, label_values)
     return
   end
 
-  local k, _, err
+  local k, _, err, forcible
   k, err = lookup_or_create(self, label_values)
   if err then
     self._log_error(err)
     return
   end
-  _, err = self._dict:safe_set(k, value)
-  if err then
-    self._log_error_kv(k, value, err)
+  _, err, forcible = self._dict:set(k, value)
+  if err or forcible then
+    self._log_error_kv(k, value, err or ERR_MSG_LRU_EVICTION)
   end
 end
 
@@ -437,7 +603,7 @@ local function observe(self, value, label_values)
   c:incr(keys[self.bucket_count+3], 1)
 end
 
--- Delete all metrics for a given gauge or a counter.
+-- Delete all metrics for a given gauge, counter or a histogram.
 --
 -- This is like `del`, but will delete all time series for all previously
 -- recorded label values.
@@ -455,22 +621,52 @@ local function reset(self)
   end
 
   local keys = self._key_index:list()
-  local name_prefix = self.name .. "{"
-  local name_prefix_length = #name_prefix
+  local name_prefixes = {}
+  local name_prefix_length_base = #self.name
+  if self.typ == TYPE_HISTOGRAM then
+    if self.label_count == 0 then
+      name_prefixes[self.name .. "_count"] = name_prefix_length_base + 6
+      name_prefixes[self.name .. "_sum"] = name_prefix_length_base + 4
+    else
+      name_prefixes[self.name .. "_count{"] = name_prefix_length_base + 7
+      name_prefixes[self.name .. "_sum{"] = name_prefix_length_base + 5
+    end
+    name_prefixes[self.name .. "_bucket{"] = name_prefix_length_base + 8
+  else
+    name_prefixes[self.name .. "{"] = name_prefix_length_base + 1
+  end
 
   for _, key in ipairs(keys) do
     local value, key_err = self._dict:get(key)
     if value then
-      -- without labels equal, or with labels and the part before { equals
-      if key == self.name or name_prefix == string.sub(key, 1, name_prefix_length) then
-        self._key_index:remove(key)
-        local _, err = self._dict:safe_set(key, nil)
+      -- For a metric to be deleted its name should either match exactly, or
+      -- have a prefix listed in `name_prefixes` (which ensures deletion of
+      -- metrics with label values).
+      local remove = key == self.name
+      if not remove then
+        for name_prefix, name_prefix_length in pairs(name_prefixes) do
+          if name_prefix == string.sub(key, 1, name_prefix_length) then
+            remove = true
+            break
+          end
+        end
+      end
+      if remove then
+        local _, err
+        err = self._key_index:remove(key, ERR_MSG_LRU_EVICTION)
+        if err then
+          self._log_error(err)
+        end
+
+        _, err = self._dict:set(key, nil)
         if err then
           self._log_error("Error resetting '", key, "': ", err)
         end
       end
     else
-      self._log_error("Error getting '", key, "': ", key_err)
+      if type(key_err) == "string" then
+        self._log_error("Error getting '", key, "': ", key_err)
+      end
     end
   end
 
@@ -512,10 +708,13 @@ function Prometheus.init(dict_name, options_or_prefix)
       DEFAULT_ERROR_METRIC_NAME
     self.sync_interval = options_or_prefix.sync_interval or
       DEFAULT_SYNC_INTERVAL
+    self.lookup_max_size = options_or_prefix.lookup_max_size or
+      DEFAULT_LOOKUP_MAX_SIZE
   else
     self.prefix = options_or_prefix or ''
     self.error_metric_name = DEFAULT_ERROR_METRIC_NAME
     self.sync_interval = DEFAULT_SYNC_INTERVAL
+    self.lookup_max_size = DEFAULT_LOOKUP_MAX_SIZE
   end
 
   self.registry = {}
@@ -525,7 +724,7 @@ function Prometheus.init(dict_name, options_or_prefix)
 
   self:counter(self.error_metric_name, "Number of nginx-lua-prometheus errors")
   self.dict:set(self.error_metric_name, 0)
-  local err = self.key_index:add(self.error_metric_name)
+  local err = self.key_index:add(self.error_metric_name, ERR_MSG_LRU_EVICTION)
   if err then
     self:log_error(err)
   end
@@ -558,7 +757,7 @@ function Prometheus:init_worker(sync_interval)
   end
   self.sync_interval = sync_interval or DEFAULT_SYNC_INTERVAL
   local counter_instance, err = resty_counter_lib.new(
-      self.dict_name, self.sync_interval)
+      self.dict_name, self.sync_interval, self.error_metric_name)
   if err then
     error(err, 2)
   end
@@ -591,9 +790,10 @@ local function register(self, name, help, label_names, buckets, typ)
     return
   end
 
-  local name_maybe_historgram = name:gsub("_bucket$", "")
-                                    :gsub("_count$", "")
-                                    :gsub("_sum$", "")
+  local gsub_a = ngx_re_gsub(name, "_bucket$", "", "jo")
+  local gsub_b = ngx_re_gsub(gsub_a, "_count$", "", "jo")
+  local name_maybe_historgram = ngx_re_gsub(gsub_b, "_sum$", "", "jo")
+
   if (typ ~= TYPE_HISTOGRAM and (
       self.registry[name] or self.registry[name_maybe_historgram]
     )) or
@@ -622,12 +822,15 @@ local function register(self, name, help, label_names, buckets, typ)
     -- ['my.net']['200'][LEAF_KEY] = 'http_count{host="my.net",status="200"}'
     -- ['my.net']['500'][LEAF_KEY] = 'http_count{host="my.net",status="500"}'
     lookup = {},
+    lookup_size = 0,
+    lookup_max_size = self.lookup_max_size,
     parent = self,
     -- Store a reference for logging functions for faster lookup.
     _log_error = function(...) self:log_error(...) end,
     _log_error_kv = function(...) self:log_error_kv(...) end,
     _key_index = self.key_index,
     _dict = self.dict,
+    reset = reset,
   }
   if typ < TYPE_HISTOGRAM then
     if typ == TYPE_GAUGE then
@@ -636,7 +839,6 @@ local function register(self, name, help, label_names, buckets, typ)
     else
       metric.inc = inc_counter
     end
-    metric.reset = reset
     metric.del = del
   else
     metric.observe = observe
@@ -647,6 +849,26 @@ local function register(self, name, help, label_names, buckets, typ)
 
   self.registry[name] = metric
   return metric
+end
+
+-- inspired by https://github.com/Kong/kong/blob/2.8.1/kong/tools/utils.lua#L1430-L1446
+-- limit to work only in rewrite, access, content and timer
+local yield
+do
+  local counter = 0
+  yield = function()
+    if not can_yield_phases[get_phase()] then
+      return
+    end
+
+    counter = counter + 1
+    if counter % YIELD_ITERATIONS ~= 0 then
+      return
+    end
+    counter = 0
+
+    ngx_sleep(0)
+  end
 end
 
 -- Public function to register a counter.
@@ -686,6 +908,8 @@ function Prometheus:metric_data()
   local seen_metrics = {}
   local output = {}
   for _, key in ipairs(keys) do
+    yield()
+
     local value, err = self.dict:get(key)
     if value then
       local short_name = short_metric_name(key)
@@ -693,21 +917,18 @@ function Prometheus:metric_data()
         local m = self.registry[short_name]
         if m then
           if m.help then
-            table.insert(output, string.format("# HELP %s%s %s\n",
+            table_insert_tail(output, string.format("# HELP %s%s %s\n",
             self.prefix, short_name, m.help))
           end
           if m.typ then
-            table.insert(output, string.format("# TYPE %s%s %s\n",
+            table_insert_tail(output, string.format("# TYPE %s%s %s\n",
               self.prefix, short_name, TYPE_LITERAL[m.typ]))
           end
         end
         seen_metrics[short_name] = true
       end
-      -- Replace "Inf" with "+Inf" in each metric's last bucket 'le' label.
-      if key:find('le="Inf"', 1, true) then
-        key = key:gsub('le="Inf"', 'le="+Inf"')
-      end
-      table.insert(output, string.format("%s%s %s\n", self.prefix, key, value))
+      key = fix_histogram_bucket_labels(key)
+      table_insert_tail(output, string.format("%s%s %s\n", self.prefix, key, value))
     else
       if type(err) == "string" then
         self:log_error("Error getting '", key, "': ", err)

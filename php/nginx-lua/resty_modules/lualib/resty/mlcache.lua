@@ -1,30 +1,63 @@
--- vim: st=4 sts=4 sw=4 et:
+-- vim: ts=4 sts=4 sw=4 et:
 
-local cjson      = require "cjson.safe"
+local new_tab    = require "table.new"
 local lrucache   = require "resty.lrucache"
 local resty_lock = require "resty.lock"
+local tablepool
+do
+    local pok
+    pok, tablepool = pcall(require, "tablepool")
+    if not pok then
+        -- fallback for OpenResty < 1.15.8.1
+        tablepool = {
+            fetch = function(_, narr, nrec)
+                return new_tab(narr, nrec)
+            end,
+            release = function(_, _, _)
+                -- nop (obj will be subject to GC)
+            end,
+        }
+    end
+end
+local codec
+do
+    local pok
+    pok, codec = pcall(require, "string.buffer")
+    if not pok then
+        codec = require "cjson"
+    end
+end
 
 
 local now          = ngx.now
+local min          = math.min
+local ceil         = math.ceil
 local fmt          = string.format
 local sub          = string.sub
 local find         = string.find
 local type         = type
+local pcall        = pcall
 local xpcall       = xpcall
 local traceback    = debug.traceback
 local error        = error
 local tostring     = tostring
 local tonumber     = tonumber
+local encode       = codec.encode
+local decode       = codec.decode
+local thread_spawn = ngx.thread.spawn
+local thread_wait  = ngx.thread.wait
 local setmetatable = setmetatable
 local shared       = ngx.shared
 local ngx_log      = ngx.log
 local WARN         = ngx.WARN
+local ERR          = ngx.ERR
 
 
 local CACHE_MISS_SENTINEL_LRU = {}
 local LOCK_KEY_PREFIX = "lua-resty-mlcache:lock:"
 local LRU_INSTANCES = setmetatable({}, { __mode = "v" })
 local SHM_SET_DEFAULT_TRIES = 3
+local BULK_DEFAULT_CONCURRENCY = 3
 
 
 local TYPES_LOOKUP = {
@@ -62,12 +95,12 @@ local marshallers = {
     end,
 
     [4] = function(t)      -- table
-        local json, err = cjson.encode(t)
-        if not json then
-            return nil, "could not encode table value: " .. err
+        local pok, str = pcall(encode, t)
+        if not pok then
+            return nil, "could not encode table value: " .. str
         end
 
-        return json
+        return str
     end,
 }
 
@@ -104,9 +137,9 @@ local unmarshallers = {
     end,
 
     [4] = function(str) -- table
-        local t, err = cjson.decode(str)
-        if not t then
-            return nil, "could not decode table value: " .. err
+        local pok, t = pcall(decode, str)
+        if not pok then
+            return nil, "could not decode table value: " .. t
         end
 
         return t
@@ -115,26 +148,25 @@ local unmarshallers = {
 
 
 local function rebuild_lru(self)
-    local name = self.name
-
     if self.lru then
-        -- When calling purge(), we invalidate the entire LRU by
-        -- GC-ing it.
-        -- lua-resty-lrucache has a 'flush_all()' method in development
-        -- which would be more appropriate:
-        -- https://github.com/openresty/lua-resty-lrucache/pull/23
-        LRU_INSTANCES[name] = nil
-        self.c_lru_gc = nil
+        if self.lru.flush_all then
+            self.lru:flush_all()
+            return
+        end
+
+        -- fallback for OpenResty < 1.13.6.2
+        -- Invalidate the entire LRU by GC-ing it.
+        LRU_INSTANCES[self.name] = nil
         self.lru = nil
     end
 
     -- Several mlcache instances can have the same name and hence, the same
     -- lru instance. We need to GC such LRU instance when all mlcache instances
     -- using them are GC'ed. We do this with a weak table.
-    local lru = LRU_INSTANCES[name]
+    local lru = LRU_INSTANCES[self.name]
     if not lru then
         lru = lrucache.new(self.lru_size)
-        LRU_INSTANCES[name] = lru
+        LRU_INSTANCES[self.name] = lru
     end
 
     self.lru = lru
@@ -142,7 +174,7 @@ end
 
 
 local _M     = {
-    _VERSION = "2.2.1",
+    _VERSION = "2.6.0",
     _AUTHOR  = "Thibault Charbonnier",
     _LICENSE = "MIT",
     _URL     = "https://github.com/thibaultcha/lua-resty-mlcache",
@@ -293,6 +325,7 @@ function _M.new(name, shm, opts)
         resty_lock_opts = opts.resty_lock_opts,
         l1_serializer   = opts.l1_serializer,
         shm_set_tries   = opts.shm_set_tries or SHM_SET_DEFAULT_TRIES,
+        debug           = opts.debug,
     }
 
     if opts.ipc_shm or opts.ipc then
@@ -652,62 +685,14 @@ local function unlock_and_ret(lock, res, err, hit_lvl)
 end
 
 
-function _M:get(key, opts, cb, ...)
-    if type(key) ~= "string" then
-        error("key must be a string", 2)
-    end
-
-    if type(cb) ~= "function" then
-        error("callback must be a function", 2)
-    end
-
-    -- worker LRU cache retrieval
-
-    local data = self.lru:get(key)
-    if data == CACHE_MISS_SENTINEL_LRU then
-        return nil, nil, 1
-    end
-
-    if data ~= nil then
-        return data, nil, 1
-    end
-
-    -- not in worker's LRU cache, need shm lookup
-
-    -- restrict this key to the current namespace, so we isolate this
-    -- mlcache instance from potential other instances using the same
-    -- shm
-    local namespaced_key = self.name .. key
-
-    -- opts validation
-
-    local ttl, neg_ttl, resurrect_ttl, l1_serializer, shm_set_tries =
-        check_opts(self, opts)
-
-    local err, went_stale, is_stale
-    data, err, went_stale, is_stale = get_shm_set_lru(self, key, namespaced_key,
-                                                      l1_serializer)
-    if err then
-        return nil, err
-    end
-
-    if data ~= nil and not went_stale then
-        if data == CACHE_MISS_SENTINEL_LRU then
-            data = nil
-        end
-
-        return data, nil, is_stale and 4 or 2
-    end
-
-    -- not in shm either
-    -- single worker must execute the callback
-
+local function run_callback(self, key, shm_key, data, ttl, neg_ttl,
+    went_stale, l1_serializer, resurrect_ttl, shm_set_tries, cb, ...)
     local lock, err = resty_lock:new(self.shm_locks, self.resty_lock_opts)
     if not lock then
         return nil, "could not create lock: " .. err
     end
 
-    local elapsed, lerr = lock:lock(LOCK_KEY_PREFIX .. namespaced_key)
+    local elapsed, lerr = lock:lock(LOCK_KEY_PREFIX .. shm_key)
     if not elapsed and lerr ~= "timeout" then
         return nil, "could not acquire callback lock: " .. lerr
     end
@@ -719,7 +704,7 @@ function _M:get(key, opts, cb, ...)
         -- get() and this one)
 
         local data2, err, went_stale2, stale2 = get_shm_set_lru(self, key,
-                                                                namespaced_key,
+                                                                shm_key,
                                                                 l1_serializer)
         if err then
             return unlock_and_ret(lock, nil, err)
@@ -765,7 +750,8 @@ function _M:get(key, opts, cb, ...)
 
     local pok, perr, err, new_ttl = xpcall(cb, traceback, ...)
     if not pok then
-        return unlock_and_ret(lock, nil, "callback threw an error: " .. perr)
+        return unlock_and_ret(lock, nil, "callback threw an error: " ..
+                              tostring(perr))
     end
 
     if err then
@@ -788,7 +774,7 @@ function _M:get(key, opts, cb, ...)
                       "value found in shm will be resurrected for ",
                       resurrect_ttl, "s (resurrect_ttl)")
 
-        local res_data, res_err = set_shm_set_lru(self, key, namespaced_key,
+        local res_data, res_err = set_shm_set_lru(self, key, shm_key,
                                                   data, resurrect_ttl,
                                                   resurrect_ttl,
                                                   SHM_FLAGS.stale,
@@ -810,7 +796,12 @@ function _M:get(key, opts, cb, ...)
 
     -- override ttl / neg_ttl
 
-    if type(new_ttl) == "number" and new_ttl >= 0 then
+    if type(new_ttl) == "number" then
+        if new_ttl < 0 then
+            -- bypass cache
+            return unlock_and_ret(lock, data, nil, 3)
+        end
+
         if data == nil then
             neg_ttl = new_ttl
 
@@ -819,8 +810,8 @@ function _M:get(key, opts, cb, ...)
         end
     end
 
-    data, err = set_shm_set_lru(self, key, namespaced_key, data,
-                                ttl, neg_ttl, nil, shm_set_tries, l1_serializer)
+    data, err = set_shm_set_lru(self, key, shm_key, data, ttl, neg_ttl, nil,
+                                shm_set_tries, l1_serializer)
     if err then
         return unlock_and_ret(lock, nil, err)
     end
@@ -833,6 +824,381 @@ function _M:get(key, opts, cb, ...)
 
     return unlock_and_ret(lock, data, nil, 3)
 end
+
+
+function _M:get(key, opts, cb, ...)
+    if type(key) ~= "string" then
+        error("key must be a string", 2)
+    end
+
+    if cb ~= nil and type(cb) ~= "function" then
+        error("callback must be nil or a function", 2)
+    end
+
+    -- worker LRU cache retrieval
+
+    local data = self.lru:get(key)
+    if data == CACHE_MISS_SENTINEL_LRU then
+        return nil, nil, 1
+    end
+
+    if data ~= nil then
+        return data, nil, 1
+    end
+
+    -- not in worker's LRU cache, need shm lookup
+
+    -- restrict this key to the current namespace, so we isolate this
+    -- mlcache instance from potential other instances using the same
+    -- shm
+    local namespaced_key = self.name .. key
+
+    -- opts validation
+
+    local ttl, neg_ttl, resurrect_ttl, l1_serializer, shm_set_tries =
+        check_opts(self, opts)
+
+    local err, went_stale, is_stale
+    data, err, went_stale, is_stale = get_shm_set_lru(self, key, namespaced_key,
+                                                      l1_serializer)
+    if err then
+        return nil, err
+    end
+
+    if data ~= nil and not went_stale then
+        if data == CACHE_MISS_SENTINEL_LRU then
+            data = nil
+        end
+
+        return data, nil, is_stale and 4 or 2
+    end
+
+    -- not in shm either
+
+    if cb == nil then
+        -- no L3 callback, early exit
+        return nil, nil, -1
+    end
+
+    -- L3 callback, single worker to run it
+
+    return run_callback(self, key, namespaced_key, data, ttl, neg_ttl,
+                        went_stale, l1_serializer, resurrect_ttl,
+                        shm_set_tries, cb, ...)
+end
+
+
+do
+local function run_thread(self, ops, from, to)
+    for i = from, to do
+        local ctx = ops[i]
+
+        ctx.data, ctx.err, ctx.hit_lvl = run_callback(self, ctx.key,
+                                                      ctx.shm_key, ctx.data,
+                                                      ctx.ttl, ctx.neg_ttl,
+                                                      ctx.went_stale,
+                                                      ctx.l1_serializer,
+                                                      ctx.resurrect_ttl,
+                                                      ctx.shm_set_tries,
+                                                      ctx.cb, ctx.arg)
+    end
+end
+
+
+local bulk_mt = {}
+bulk_mt.__index = bulk_mt
+
+
+function _M.new_bulk(n_ops)
+    local bulk = new_tab((n_ops or 2) * 4, 1) -- 4 slots per op
+    bulk.n = 0
+
+    return setmetatable(bulk, bulk_mt)
+end
+
+
+function bulk_mt:add(key, opts, cb, arg)
+    local i = (self.n * 4) + 1
+    self[i] = key
+    self[i + 1] = opts
+    self[i + 2] = cb
+    self[i + 3] = arg
+    self.n = self.n + 1
+end
+
+
+local function bulk_res_iter(res, i)
+    local idx = i * 3 + 1
+    if idx > res.n then
+        return
+    end
+
+    i = i + 1
+
+    local data = res[idx]
+    local err = res[idx + 1]
+    local hit_lvl = res[idx + 2]
+
+    return i, data, err, hit_lvl
+end
+
+
+function _M.each_bulk_res(res)
+    if not res.n then
+        error("res must have res.n field; is this a get_bulk() result?", 2)
+    end
+
+    return bulk_res_iter, res, 0
+end
+
+
+function _M:get_bulk(bulk, opts)
+    if type(bulk) ~= "table" then
+        error("bulk must be a table", 2)
+    end
+
+    if not bulk.n then
+        error("bulk must have n field", 2)
+    end
+
+    if opts then
+        if type(opts) ~= "table" then
+            error("opts must be a table", 2)
+        end
+
+        if opts.concurrency then
+            if type(opts.concurrency) ~= "number" then
+                error("opts.concurrency must be a number", 2)
+            end
+
+            if opts.concurrency <= 0 then
+                error("opts.concurrency must be > 0", 2)
+            end
+        end
+    end
+
+    local n_bulk = bulk.n * 4
+    local res = new_tab(n_bulk - n_bulk / 4, 1)
+    local res_idx = 1
+
+    -- only used if running L3 callbacks
+    local n_cbs = 0
+    local cb_ctxs
+
+    -- bulk
+    -- { "key", opts, cb, arg }
+    --
+    -- res
+    -- { data, "err", hit_lvl }
+
+    for i = 1, n_bulk, 4 do
+        local b_key = bulk[i]
+        local b_opts = bulk[i + 1]
+        local b_cb = bulk[i + 2]
+
+        if type(b_key) ~= "string" then
+            error("key at index " .. i .. " must be a string for operation " ..
+                  ceil(i / 4) .. " (got " .. type(b_key) .. ")", 2)
+        end
+
+        if type(b_cb) ~= "function" then
+            error("callback at index " .. i + 2 .. " must be a function " ..
+                  "for operation " .. ceil(i / 4) .. " (got " .. type(b_cb) ..
+                  ")", 2)
+        end
+
+        -- worker LRU cache retrieval
+
+        local data = self.lru:get(b_key)
+        if data ~= nil then
+            if data == CACHE_MISS_SENTINEL_LRU then
+                data = nil
+            end
+
+            res[res_idx] = data
+            --res[res_idx + 1] = nil
+            res[res_idx + 2] = 1
+
+        else
+            local pok, ttl, neg_ttl, resurrect_ttl, l1_serializer, shm_set_tries
+                = pcall(check_opts, self, b_opts)
+            if not pok then
+                -- strip the stacktrace
+                local err = ttl:match("mlcache%.lua:%d+:%s(.*)")
+                error("options at index " .. i + 1 .. " for operation " ..
+                      ceil(i / 4) .. " are invalid: " .. err, 2)
+            end
+
+            -- not in worker's LRU cache, need shm lookup
+            -- we will prepare a task for each cache miss
+            local namespaced_key = self.name .. b_key
+
+            local err, went_stale, is_stale
+            data, err, went_stale, is_stale = get_shm_set_lru(self, b_key,
+                                                           namespaced_key,
+                                                           l1_serializer)
+            if err then
+                --res[res_idx] = nil
+                res[res_idx + 1] = err
+                --res[res_idx + 2] = nil
+
+            elseif data ~= nil and not went_stale then
+                if data == CACHE_MISS_SENTINEL_LRU then
+                    data = nil
+                end
+
+                res[res_idx] = data
+                --res[res_idx + 1] = nil
+                res[res_idx + 2] = is_stale and 4 or 2
+
+            else
+                -- not in shm either, we have to prepare a task to run the
+                -- L3 callback
+
+                n_cbs = n_cbs + 1
+
+                if n_cbs == 1 then
+                    cb_ctxs = tablepool.fetch("bulk_cb_ctxs", 1, 0)
+                end
+
+                local ctx = tablepool.fetch("bulk_cb_ctx", 0, 15)
+                ctx.res_idx = res_idx
+                ctx.cb = b_cb
+                ctx.arg = bulk[i + 3] -- arg
+                ctx.key = b_key
+                ctx.shm_key = namespaced_key
+                ctx.data = data
+                ctx.ttl = ttl
+                ctx.neg_ttl = neg_ttl
+                ctx.went_stale = went_stale
+                ctx.l1_serializer = l1_serializer
+                ctx.resurrect_ttl = resurrect_ttl
+                ctx.shm_set_tries = shm_set_tries
+                ctx.data = data
+                ctx.err = nil
+                ctx.hit_lvl = nil
+
+                cb_ctxs[n_cbs] = ctx
+            end
+        end
+
+        res_idx = res_idx + 3
+    end
+
+    if n_cbs == 0 then
+        -- no callback to run, all items were in L1/L2
+        res.n = res_idx - 1
+        return res
+    end
+
+    -- some L3 callbacks have to run
+    -- schedule threads as per our concurrency settings
+    -- we will use this thread as well
+
+    local concurrency
+    if opts then
+        concurrency = opts.concurrency
+    end
+
+    if not concurrency then
+        concurrency = BULK_DEFAULT_CONCURRENCY
+    end
+
+    local threads
+    local threads_idx = 0
+
+    do
+        -- spawn concurrent threads
+        local thread_size
+        local n_threads = min(n_cbs, concurrency) - 1
+
+        if n_threads >  0 then
+            threads = tablepool.fetch("bulk_threads", n_threads, 0)
+            thread_size = ceil(n_cbs / concurrency)
+        end
+
+        if self.debug then
+            ngx.log(ngx.DEBUG, "spawning ", n_threads, " threads to run ",
+                               n_cbs, " callbacks")
+        end
+
+        local from = 1
+        local rest = n_cbs
+
+        for i = 1, n_threads do
+            local to
+            if rest >= thread_size then
+                rest = rest - thread_size
+                to = from + thread_size - 1
+            else
+                rest = 0
+                to = from
+            end
+
+            if self.debug then
+                ngx.log(ngx.DEBUG, "thread ", i, " running callbacks ", from,
+                                   " to ", to)
+            end
+
+            threads_idx = threads_idx + 1
+            threads[i] = thread_spawn(run_thread, self, cb_ctxs, from, to)
+
+            from = from + thread_size
+
+            if rest == 0 then
+                break
+            end
+        end
+
+        if rest > 0 then
+            -- use this thread as one of our concurrent threads
+            local to = from + rest - 1
+
+            if self.debug then
+                ngx.log(ngx.DEBUG, "main thread running callbacks ", from,
+                                   " to ", to)
+            end
+
+            run_thread(self, cb_ctxs, from, to)
+        end
+    end
+
+    -- wait for other threads
+
+    for i = 1, threads_idx do
+        local ok, err = thread_wait(threads[i])
+        if not ok then
+            -- when thread_wait() fails, we don't get res_idx, and thus
+            -- cannot populate the appropriate res indexes with the
+            -- error
+            ngx_log(ERR, "failed to wait for thread number ", i, ": ", err)
+        end
+    end
+
+    for i = 1, n_cbs do
+        local ctx = cb_ctxs[i]
+        local ctx_res_idx = ctx.res_idx
+
+        res[ctx_res_idx] = ctx.data
+        res[ctx_res_idx + 1] = ctx.err
+        res[ctx_res_idx + 2] = ctx.hit_lvl
+
+        tablepool.release("bulk_cb_ctx", ctx, true) -- no clear tab
+    end
+
+    tablepool.release("bulk_cb_ctxs", cb_ctxs)
+
+    if threads then
+        tablepool.release("bulk_threads", threads)
+    end
+
+    res.n = res_idx - 1
+
+    return res
+end
+
+
+end -- get_bulk()
 
 
 function _M:peek(key, stale)
@@ -977,6 +1343,11 @@ end
 function _M:purge(flush_expired)
     if not self.broadcast then
         error("no ipc to propagate purge, specify opts.ipc_shm or opts.ipc", 2)
+    end
+
+    if not self.lru.flush_all and LRU_INSTANCES[self.name] ~= self.lru then
+        error("cannot purge when using custom LRU cache with " ..
+              "OpenResty < 1.13.6.2", 2)
     end
 
     -- clear shm first

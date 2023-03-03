@@ -99,7 +99,7 @@ function _M.setup()
         lru_size = 10, -- size of the L1 (Lua VM) cache
         ttl      = 300, -- 1h ttl for hits
     })
-    if err == nil then
+    if err then
         ngx.log(ngx.ERR, "Failed setting up cache: ", err)
         return
     end

@@ -105,8 +105,8 @@ Creates a new hmac instance. If failed, returns C<nil>.
 The C<key> argument specifies the key to use when calculating the message authentication code (MAC).
 C<key> is a lua string which may contain printable characters or binary data.
 
-The C<hash_algorithm> argument specifies which hashing algorithm to use (C<hash.ALGOS.MD5>, C<hash.ALGOS.SHA1>, C<hash.ALGOS.SHA256>, C<hash.ALGOS.SHA512>).
-The default value is C<hash.ALGOS.MD5>.
+The C<hash_algorithm> argument specifies which hashing algorithm to use (C<hmac.ALGOS.MD5>, C<hmac.ALGOS.SHA1>, C<hmac.ALGOS.SHA256>, C<hmac.ALGOS.SHA512>).
+The default value is C<hmac.ALGOS.MD5>.
 
 
 
@@ -207,7 +207,7 @@ and then load the library in Lua:
 
 This module is licensed under the BSD license.
 
-Copyright (C) 2012-2017, Thought Foundry Inc.
+Copyright (C) 2012-2021, Thought Foundry Inc.
 
 All rights reserved.
 

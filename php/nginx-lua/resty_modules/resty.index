@@ -15,29 +15,6 @@ module lua-resty-string-0.11
   section 7149 7251 see also
 
 # END lua-resty-string
-# BEGIN lua-resty-hmac
-
-dist lua-resty-hmac-0.02
-  aliases resty.hmac
-  modules lua-resty-hmac-0.02
-
-module lua-resty-hmac-0.02
-  aliases resty.hmac
-  section 18 88 name
-  section 88 188 status
-  section 188 369 description
-  section 369 1731 synopsis
-  section 1731 3981 methods
-  section 2142 2657 new
-  section 2657 2945 update
-  section 2945 3610 final
-  section 3610 3981 reset
-  section 3981 4264 prerequisites
-  section 4264 4949 installation
-  section 4949 6382 copyright and license
-  section 6382 6484 see also
-
-# END lua-resty-hmac
 # BEGIN lua-resty-jwt
 
 dist lua-resty-jwt-0.2.0
@@ -91,143 +68,173 @@ module lua-resty-jwt-0.2.0
   section 89577 89678 see also
 
 # END lua-resty-jwt
-# BEGIN lua-resty-mlcache
-
-dist lua-resty-mlcache-2.2.1
-  aliases resty.mlcache
-  modules lua-resty-mlcache-2.2.1
-
-module lua-resty-mlcache-2.2.1
-  aliases resty.mlcache
-  section 18 3628 lua-resty-mlcache
-  section 3628 5545 synopsis
-  section 5545 6142 requirements
-  section 6142 6527 installation
-  section 6527 33715 methods
-  section 6545 12856 new
-  section 12856 22915 get
-  section 22915 24814 peek
-  section 24814 26935 set
-  section 26935 27990 delete
-  section 27990 29433 purge
-  section 29433 33715 update
-  section 33715 33772 changelog
-  section 33772 34207 license
-
-# END lua-resty-mlcache
 # BEGIN nginx-lua-prometheus
 
-dist nginx-lua-prometheus-0.20200523
-  modules integration.readme nginx-lua-prometheus-0.20200523 nginx-lua-prometheus-0.20200523
+dist nginx-lua-prometheus-0.20221218
+  modules changelog integration.readme nginx-lua-prometheus-0.20221218 nginx-lua-prometheus-0.20221218
+
+module changelog
+  section 18 1961 changelog
 
 module integration.readme
 
-module nginx-lua-prometheus-0.20200523
-  section 352 17026 prometheus metric library for nginx
-  section 566 1124 installation
-  section 1124 3513 quick start guide
-  section 3513 13881 api reference
-  section 3537 4726 init()
-  section 4726 5895 prometheus:counter()
-  section 5895 6768 prometheus:gauge()
-  section 6768 7914 prometheus:histogram()
-  section 7914 8345 prometheus:collect()
-  section 8345 8462 prometheus:metric_data()
-  section 8462 9308 counter:inc()
-  section 9308 10209 counter:del()
-  section 10209 10610 counter:reset()
-  section 10610 11225 gauge:set()
-  section 11225 11963 gauge:inc()
-  section 11963 12722 gauge:del()
-  section 12722 12992 gauge:reset()
-  section 12992 13597 histogram:observe()
-  section 13597 13881 built-in metrics
-  section 13881 14682 caveats
-  section 13899 14682 usage in stream module
-  section 14682 15288 troubleshooting
-  section 14708 15103 make sure that nginx lua module is enabled
-  section 15103 15288 keep lua code cache enabled
-  section 15288 16049 development
-  section 15310 15447 install dependencies for testing
-  section 15447 15641 run tests
-  section 15641 16049 releasing new version
-  section 16049 16685 credits
-  section 16685 17026 license
-  section 16732 17026 third party license
+module nginx-lua-prometheus-0.20221218
+  section 196 19444 prometheus metric library for nginx
+  section 410 1289 installation
+  section 1289 3693 quick start guide
+  section 3693 14739 api reference
+  section 3717 5333 init()
+  section 5333 6507 prometheus:counter()
+  section 6507 7385 prometheus:gauge()
+  section 7385 8536 prometheus:histogram()
+  section 8536 8967 prometheus:collect()
+  section 8967 9084 prometheus:metric_data()
+  section 9084 9930 counter:inc()
+  section 9930 10831 counter:del()
+  section 10831 11232 counter:reset()
+  section 11232 11847 gauge:set()
+  section 11847 12585 gauge:inc()
+  section 12585 13344 gauge:del()
+  section 13344 13614 gauge:reset()
+  section 13614 14219 histogram:observe()
+  section 14219 14455 histogram:reset()
+  section 14455 14739 built-in metrics
+  section 14739 15540 caveats
+  section 14757 15540 usage in stream module
+  section 15540 16356 known issues
+  section 15563 16356 libnginx-mod-http-lua broken in some debian and ubuntu versions
+  section 16356 17676 troubleshooting
+  section 16382 16778 make sure that nginx lua module is enabled
+  section 16778 16963 keep lua code cache enabled
+  section 16963 17676 try using an older version of the library
+  section 17676 18467 development
+  section 17698 17835 install dependencies for testing
+  section 17835 18029 run tests
+  section 18029 18467 releasing new version
+  section 18467 19103 credits
+  section 19103 19444 license
+  section 19150 19444 third party license
 
-module nginx-lua-prometheus-0.20200523
-  section 352 17026 prometheus metric library for nginx
-  section 566 1124 installation
-  section 1124 3513 quick start guide
-  section 3513 13881 api reference
-  section 3537 4726 init()
-  section 4726 5895 prometheus:counter()
-  section 5895 6768 prometheus:gauge()
-  section 6768 7914 prometheus:histogram()
-  section 7914 8345 prometheus:collect()
-  section 8345 8462 prometheus:metric_data()
-  section 8462 9308 counter:inc()
-  section 9308 10209 counter:del()
-  section 10209 10610 counter:reset()
-  section 10610 11225 gauge:set()
-  section 11225 11963 gauge:inc()
-  section 11963 12722 gauge:del()
-  section 12722 12992 gauge:reset()
-  section 12992 13597 histogram:observe()
-  section 13597 13881 built-in metrics
-  section 13881 14682 caveats
-  section 13899 14682 usage in stream module
-  section 14682 15288 troubleshooting
-  section 14708 15103 make sure that nginx lua module is enabled
-  section 15103 15288 keep lua code cache enabled
-  section 15288 16049 development
-  section 15310 15447 install dependencies for testing
-  section 15447 15641 run tests
-  section 15641 16049 releasing new version
-  section 16049 16685 credits
-  section 16685 17026 license
-  section 16732 17026 third party license
+module nginx-lua-prometheus-0.20221218
+  section 196 19444 prometheus metric library for nginx
+  section 410 1289 installation
+  section 1289 3693 quick start guide
+  section 3693 14739 api reference
+  section 3717 5333 init()
+  section 5333 6507 prometheus:counter()
+  section 6507 7385 prometheus:gauge()
+  section 7385 8536 prometheus:histogram()
+  section 8536 8967 prometheus:collect()
+  section 8967 9084 prometheus:metric_data()
+  section 9084 9930 counter:inc()
+  section 9930 10831 counter:del()
+  section 10831 11232 counter:reset()
+  section 11232 11847 gauge:set()
+  section 11847 12585 gauge:inc()
+  section 12585 13344 gauge:del()
+  section 13344 13614 gauge:reset()
+  section 13614 14219 histogram:observe()
+  section 14219 14455 histogram:reset()
+  section 14455 14739 built-in metrics
+  section 14739 15540 caveats
+  section 14757 15540 usage in stream module
+  section 15540 16356 known issues
+  section 15563 16356 libnginx-mod-http-lua broken in some debian and ubuntu versions
+  section 16356 17676 troubleshooting
+  section 16382 16778 make sure that nginx lua module is enabled
+  section 16778 16963 keep lua code cache enabled
+  section 16963 17676 try using an older version of the library
+  section 17676 18467 development
+  section 17698 17835 install dependencies for testing
+  section 17835 18029 run tests
+  section 18029 18467 releasing new version
+  section 18467 19103 credits
+  section 19103 19444 license
+  section 19150 19444 third party license
 
 # END nginx-lua-prometheus
+# BEGIN lua-resty-mlcache
+
+dist lua-resty-mlcache-2.6.0
+  aliases resty.mlcache
+  modules lua-resty-mlcache-2.6.0
+
+module lua-resty-mlcache-2.6.0
+  aliases resty.mlcache
+  section 18 3939 lua-resty-mlcache
+  section 3939 6038 synopsis
+  section 6038 6577 requirements
+  section 6577 6962 installation
+  section 6962 40068 methods
+  section 6980 13569 new
+  section 13569 24310 get
+  section 24310 27437 get_bulk
+  section 27437 28472 new_bulk
+  section 28472 29103 each_bulk_res
+  section 29103 31549 peek
+  section 31549 33347 set
+  section 33347 34107 delete
+  section 34107 35502 purge
+  section 35502 40068 update
+  section 40068 40261 resources
+  section 40261 40318 changelog
+  section 40318 40691 license
+
+# END lua-resty-mlcache
+# BEGIN lua-resty-hmac
+
+dist lua-resty-hmac-0.06
+  aliases resty.hmac
+  modules lua-resty-hmac-0.06
+
+module lua-resty-hmac-0.06
+  aliases resty.hmac
+  section 18 88 name
+  section 88 188 status
+  section 188 369 description
+  section 369 1731 synopsis
+  section 1731 3981 methods
+  section 2142 2657 new
+  section 2657 2945 update
+  section 2945 3610 final
+  section 3610 3981 reset
+  section 3981 4264 prerequisites
+  section 4264 4949 installation
+  section 4949 6382 copyright and license
+  section 6382 6484 see also
+
+# END lua-resty-hmac
 # BEGIN lua-resty-http
 
-dist lua-resty-http-0.14
+dist lua-resty-http-0.16.1
   aliases resty.http
-  modules lua-resty-http-0.14
+  modules lua-resty-http-0.16.1
 
-module lua-resty-http-0.14
+module lua-resty-http-0.16.1
   aliases resty.http
-  section 18 175 lua-resty-http
-  section 175 211 status
-  section 211 576 features
-  section 576 3377 api
-  section 1232 3377 synopsis
-  section 3377 9697 connection
-  section 3398 3540 new
-  section 3540 4288 connect
-  section 4288 6188 connect_proxy
-  section 6188 6343 set_timeout
-  section 6343 6663 set_timeouts
-  section 6663 6951 ssl_handshake
-  section 6951 8029 set_keepalive
-  section 8029 8906 set_proxy_options
-  section 8906 9486 get_reused_times
-  section 9486 9697 close
-  section 9697 13324 requesting
-  section 9718 11008 request
-  section 11008 12106 request_uri
-  section 12106 13324 request_pipeline
-  section 13324 14358 response
-  section 13343 14081 res.body_reader
-  section 14081 14189 res:read_body
-  section 14189 14358 res:read_trailers
-  section 14358 15553 proxy
-  section 14904 15265 proxy_request
-  section 15265 15553 proxy_response
-  section 15553 17202 utility
-  section 15571 16210 parse_uri
-  section 16210 17202 get_client_body_reader
-  section 17202 17434 author
-  section 17434 18882 licence
+  section 18 13196 lua-resty-http
+  section 176 358 status
+  section 358 779 features
+  section 779 1471 api
+  section 1270 1471 deprecated
+  section 1471 13196 usage
+  section 2153 2960 single-shot request
+  section 2960 13196 streamed request
+  section 13196 14288 response
+  section 13215 14009 res.body\_reader
+  section 14009 14118 res:read\_body
+  section 14118 14288 res:read\_trailers
+  section 14288 15980 utility
+  section 14306 14946 parse\_uri
+  section 14946 15980 get\_client\_body\_reader
+  section 15980 20066 deprecated
+  section 16092 16607 tcp only connect
+  section 16607 18701 connect\_proxy
+  section 18701 19072 ssl\_handshake
+  section 19072 20066 proxy\_request / proxy\_response
+  section 19415 19777 proxy\_request
+  section 19777 20066 proxy\_response
+  section 20066 20192 author
+  section 20192 21629 licence
 
 # END lua-resty-http
