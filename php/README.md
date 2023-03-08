@@ -81,8 +81,16 @@ PHP docker images with batteries included for running WordPress
   included in the cache key
 * `STACK_PAGE_CACHE_KEY_DISCARDED_QUERY_PARAMS` - a list of query parameters separated by `,` which
   will not be included in the cache key (the request uri that reaches the backend remains unaltered);
+* `CORS_ALLOW_ORIGINS` - a list of allowed CORS origins. Use `*` to enable all, otherwise a comma separated
+  list of allowed `Origin` headers. Must be set to enable CORS handling
+* `CORS_ALLOW_PATHS` - a regexp that restricts CORS handling to specific paths (default to `\.(css|ttf|otf|eot|woff|woff2)$`)
+* `CORS_ALLOW_METHODS` - sets the `Access-Control-Allow-Methods` (default to `GET,POST,PUT,PATCH,DELETE,OPTIONS`)
+* `CORS_ALLOW_HEADERS` - sets the `Access-Control-Allow-Headers` (default to `accept,accept-encoding,authorization,content-type,dnt,origin,user-agent,x-requested-with`)
+* `CORS_ALLOW_CREDENTIALS` - sets the `Aceess-Control-Allow-Credentials` (default to `false`)
+* `CORS_PREFLIGHT_MAX_AGE` - sets the `Access-Control-Max-Age` (default to `86400`)
+* `CORS_EXPOSE_HEADERS` - sets the `Access-Control-Expose-Headers` (defaults to ``)
 
-Request query parameters that are not specified in `STACK_PAGE_CACHE_KEY_INCLUDED_QUERY_PARAMS` 
+Request query parameters that are not specified in `STACK_PAGE_CACHE_KEY_INCLUDED_QUERY_PARAMS`
 or `STACK_PAGE_CACHE_KEY_DISCARDED_QUERY_PARAMS` will result in a cache skip.
 
 ## OpenResty modules
