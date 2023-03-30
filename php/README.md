@@ -50,8 +50,8 @@ PHP docker images with batteries included for running WordPress
 * `SMTP_PORT` (default to `587`)
 * `SMTP_TLS` (default to `on`)
 * `SMTP_STARTTLS` (default to `on`)
-* `WORKER_GROUP` (default to `www-data`)
-* `WORKER_USER` (default to `www-data`)
+* `WORKER_GROUP` (default to `www-data`) - sets the user for PHP workers, but only if running as root
+* `WORKER_USER` (default to `www-data`) - sets the user for PHP workers, but only if running as root
 * `STACK_MEDIA_BUCKET` - if set serves the `STACK_MEDIA_PATH` from this media bucket
   (eg. gs://my-google-cloud-storage-bucket/prefix or s3://my-aws-s3-bucket)
 * `STACK_MEDIA_PATH` (default to `/media`)
