@@ -9,7 +9,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-RELEASE_URL="https://github.com/presslabs/dockerize/releases/download/v${DOCKERIZE_VERSION}"
+RELEASE_URL="https://github.com/bitpoke/dockerize/releases/download/v${DOCKERIZE_VERSION}"
 ARCHIVE_FILE="dockerize-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz"
 
 set -x
