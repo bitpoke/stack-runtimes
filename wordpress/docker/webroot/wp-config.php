@@ -79,6 +79,11 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
     $_SERVER['HTTPS'] = 'on';
 }
 
+
+if ( defined( 'WP_CLI' ) && WP_CLI && ! isset( $_SERVER['HTTP_HOST'] ) ) {
+    $_SERVER['HTTP_HOST'] = parse_url( getenv( 'WP_HOME' ) ?: getenv( 'WP_SITEURL' ), PHP_URL_HOST );
+}
+
 $user_config = dirname( __DIR__ ) . '/config/wp-config.php';
 if ( file_exists( $user_config ) ) {
     require_once $user_config;
