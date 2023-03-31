@@ -41,8 +41,8 @@ if [[ $IMAGE == *"bedrock"* ]] ; then
         BUILDER_IMAGE="${IMAGE}"
     fi
 fi
-if [[ $IMAGE == *"bedrock-php-8."* ]] ; then
-    TEST_CONTEXT="wordpress/test/bedrock-php-8"
+if [[ $IMAGE == *"bedrock-php-7.4"* ]] ; then
+    TEST_CONTEXT="wordpress/test/bedrock-php-7.4"
 fi
 
 export TEST_IMAGE

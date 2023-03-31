@@ -20,6 +20,18 @@ include ../docker.Makefile
 wordpress-runtime-bedrock: wordpress-runtime-bedrock-build
 push-wordpress-runtime-bedrock: push-wordpress-runtime-bedrock-build
 
+# Modify build targets for bedrock-php-7.4 so that we build, test and publish bedrock-php-7.4 and bedrock-build-php-7.4 variants
+.build/wordpress-runtime-bedrock-build-php-7.4: .build/wordpress-runtime-bedrock-php-7.4
+.build/wordpress-runtime-bedrock-build-php-7.4: BASE_IMAGE := local.build/wordpress-runtime-bedrock-php-7.4
+.build/wordpress-runtime-bedrock-build-php-7.4: DOCKER_BUILD := docker build
+
+.build/tag-wordpress-runtime-bedrock-build-php-7.4: .build/tag-wordpress-runtime-bedrock-php-7.4
+
+.build/test-wordpress-runtime-bedrock-build-php-7.4: .build/test-wordpress-runtime-bedrock-build-php-7.4 ;
+
+wordpress-runtime-bedrock-php-7.4: wordpress-runtime-bedrock-build-php-7.4
+push-wordpress-runtime-bedrock-php-7.4: push-wordpress-runtime-bedrock-build-php-7.4
+
 # Modify build targets for bedrock-php-8.0 so that we build, test and publish bedrock-php-8.0 and bedrock-build-php-8.0 variants
 .build/wordpress-runtime-bedrock-build-php-8.0: .build/wordpress-runtime-bedrock-php-8.0
 .build/wordpress-runtime-bedrock-build-php-8.0: BASE_IMAGE := local.build/wordpress-runtime-bedrock-php-8.0

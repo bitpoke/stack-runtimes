@@ -1,7 +1,7 @@
 ARG PHP_BASE_IMAGE=docker.io/bitpoke/php-runtime:8.0
 FROM ${PHP_BASE_IMAGE} as bedrock
 
-ENV WP_CLI_VERSION=2.6.0
+ENV WP_CLI_VERSION=2.7.1
 ENV WP_CLI_CONFIG_PATH=/app/wp-cli.yml
 ENV DOCUMENT_ROOT=/app/web
 ENV WP_CONTENT_DIR=${DOCUMENT_ROOT}/app
