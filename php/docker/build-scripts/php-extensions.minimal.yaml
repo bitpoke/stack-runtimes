@@ -62,8 +62,8 @@
 
 # Install mcrypt for backward compatibility
 - name: mcrypt
-  phpMaxVersion: 8.1
-  version: 1.0.5
+  phpMaxVersion: 8.2
+  version: 1.0.6
   type: pecl
   build:
     depends:
@@ -83,7 +83,7 @@
 # install serializers to make them available for the rest of the extensions
 - name: igbinary
   type: pecl
-  version: 3.2.9
+  version: 3.2.14
 
 - name: msgpack
   phpMinVersion: 7.4
@@ -94,11 +94,11 @@
 - name: msgpack
   phpMinVersion: 8.1
   type: pecl
-  version: 2.2.0RC1
+  version: 2.2.0RC2
 
 - name: zstd
   type: pecl
-  version: 0.11.0
+  version: 0.12.1
   build:
     depends:
       - "libzstd-dev"
@@ -151,4 +151,3 @@
       - "--enable-redis-msgpack"
       - "--enable-redis-lzf"
       - "--enable-redis-zstd"
-
