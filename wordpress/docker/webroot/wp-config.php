@@ -89,8 +89,28 @@ if ( file_exists( $user_config ) ) {
     require_once $user_config;
 }
 
+if ( defined( 'WP_CLI' ) && WP_CLI && ! isset( $_SERVER['HTTP_HOST'] ) ) {
+	$_wp_cli_detected_host = parse_url( defined( 'WP_HOME' ) ? WP_HOME : '', PHP_URL_HOST );
+
+	if ( empty( $_wp_cli_detected_host	) ) {
+		$_wp_cli_detected_host = parse_url( defined( 'WP_SITEURL' ) ? WP_SITEURL : '', PHP_URL_HOST );
+	}
+
+	if ( empty( $_wp_cli_detected_host	) ) {
+		$_wp_cli_detected_host = parse_url( getenv( 'WP_HOME' ) ?: getenv( 'WP_SITEURL' ), PHP_URL_HOST );
+	}
+
+	if ( empty( $_wp_cli_detected_host	) ) {
+		trigger_error( 'Unable to detect HTTP_HOST for WP-CLI. You must either set WP_HOME and WP_SITEURL environment variables of use --url argument when calling WP-CLI.', E_USER_ERROR );
+		exit(1);
+	}
+
+    $_SERVER['HTTP_HOST'] = $_wp_cli_detected_host;
+	unset( $_wp_cli_detected_host );
+}
+
 $scheme = 'http://';
-if ( 'on' === $_SERVER['HTTPS'] ) {
+if ( isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ) {
 	$scheme = 'https://';
 }
 if ( ! defined( 'WP_HOME' ) ) {
