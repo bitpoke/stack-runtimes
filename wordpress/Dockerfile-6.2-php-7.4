@@ -3,8 +3,19 @@ FROM ${BASE_IMAGE} as bedrock
 ENV WORDPRESS_VERSION=6.2
 ENV WP_CONTENT_DIR=${DOCUMENT_ROOT}/wp-content
 ENV STACK_MEDIA_PATH=/wp-content/uploads
+COPY patches /usr/local/docker/patches
 RUN set -ex \
     && wp core download --skip-content --path=web/wp --version=${WORDPRESS_VERSION} \
-    && cp /usr/local/docker/webroot/* /app/web/
+    && cp /usr/local/docker/webroot/* /app/web/ \
+    && cd /app/web/wp \
+    && for patch in /usr/local/docker/patches/*.diff; do patch -p1 < $patch; done \
+    && find /app/web/wp -type f '(' \
+        -name \*-baseline -o \
+        -name \*-merge -o \
+        -name \*-original -o \
+        -name \*.orig -o \
+        -name \*.rej \
+    ')' -delete
+
 ONBUILD COPY --chown=www-data:www-data config /app/config
 ONBUILD COPY --chown=www-data:www-data wp-content /app/web/wp-content

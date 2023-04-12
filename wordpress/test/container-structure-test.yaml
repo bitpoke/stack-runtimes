@@ -6,11 +6,6 @@ commandTests:
     args: ["wp"]
     expectedOutput: ["/usr/local/bin/wp\n"]
 
-  - name: wp core verify-checksums
-    command: "wp"
-    args: ["core", "verify-checksums"]
-    exitCode: 0
-
 metadataTest:
   env:
     - key: PORT

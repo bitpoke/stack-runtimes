@@ -1,0 +1,39 @@
+diff -Naur b/wp-admin/includes/class-wp-posts-list-table.php a/wp-admin/includes/class-wp-posts-list-table.php
+--- b/wp-admin/includes/class-wp-posts-list-table.php	2023-02-07 19:10:21
++++ a/wp-admin/includes/class-wp-posts-list-table.php	2023-04-12 21:06:48
+@@ -89,17 +89,24 @@
+ 			)
+ 		);
+ 
+-		$this->user_posts_count = (int) $wpdb->get_var(
+-			$wpdb->prepare(
+-				"SELECT COUNT( 1 )
+-				FROM $wpdb->posts
+-				WHERE post_type = %s
+-				AND post_status NOT IN ( '" . implode( "','", $exclude_states ) . "' )
+-				AND post_author = %d",
+-				$post_type,
+-				get_current_user_id()
+-			)
+-		);
++		$cache_key = wp_cache_get_last_changed( 'posts' ) . ':user_' . get_current_user_id() . '_' . $post_type . '_count:' . md5( 'post status NOT IN' . $exclude_states );
++		$user_posts_count = wp_cache_get( $cache_key, 'persistent-counts' );
++		if ( false === $user_posts_count ) {
++			$user_posts_count = (int) $wpdb->get_var(
++				$wpdb->prepare(
++					"SELECT COUNT( 1 )
++					FROM $wpdb->posts
++					WHERE post_type = %s
++					AND post_status NOT IN ( '" . implode( "','", $exclude_states ) . "' )
++					AND post_author = %d",
++					$post_type,
++					get_current_user_id()
++				)
++			);
++			wp_cache_set( $cache_key, $user_posts_count, 'persistent-counts' );
++		}
++
++		$this->user_posts_count = (int) $user_posts_count;
+ 
+ 		if ( $this->user_posts_count
+ 			&& ! current_user_can( $post_type_object->cap->edit_others_posts )

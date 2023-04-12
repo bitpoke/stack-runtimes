@@ -1,0 +1,171 @@
+diff --git a/wp-admin/includes/class-wp-privacy-requests-table.php b/wp-admin/includes/class-wp-privacy-requests-table.php
+index 3061b73375d8..6b5d3a0568df 100644
+--- a/wp-admin/includes/class-wp-privacy-requests-table.php
++++ b/wp-admin/includes/class-wp-privacy-requests-table.php
+@@ -109,8 +109,9 @@ protected function get_default_primary_column_name() {
+ 	protected function get_request_counts() {
+ 		global $wpdb;
+ 
+-		$cache_key = $this->post_type . '-' . $this->request_type;
+-		$counts    = wp_cache_get( $cache_key, 'counts' );
++		// This duplicates wp_count_posts() with an additional post_name clause.
++		$cache_key = wp_cache_get_last_changed( 'posts' ) . ':' . $this->post_type . '-' . $this->request_type;
++		$counts    = wp_cache_get( $cache_key, 'persistent-counts' );
+ 
+ 		if ( false !== $counts ) {
+ 			return $counts;
+@@ -131,7 +132,7 @@ protected function get_request_counts() {
+ 		}
+ 
+ 		$counts = (object) $counts;
+-		wp_cache_set( $cache_key, $counts, 'counts' );
++		wp_cache_set( $cache_key, $counts, 'persistent-counts' );
+ 
+ 		return $counts;
+ 	}
+diff --git a/wp-includes/comment.php b/wp-includes/comment.php
+index a52edf84f4df..301c60bc591e 100644
+--- a/wp-includes/comment.php
++++ b/wp-includes/comment.php
+@@ -1412,7 +1412,9 @@ function wp_count_comments( $post_id = 0 ) {
+ 		return $filtered;
+ 	}
+ 
+-	$count = wp_cache_get( "comments-{$post_id}", 'counts' );
++	$cache_key = wp_cache_get_last_changed( 'comment' ) . ":comments-{$post_id}";
++
++	$count = wp_cache_get( $cache_key, 'persistent-counts' );
+ 	if ( false !== $count ) {
+ 		return $count;
+ 	}
+@@ -1422,7 +1424,7 @@ function wp_count_comments( $post_id = 0 ) {
+ 	unset( $stats['awaiting_moderation'] );
+ 
+ 	$stats_object = (object) $stats;
+-	wp_cache_set( "comments-{$post_id}", $stats_object, 'counts' );
++	wp_cache_set( $cache_key, $stats_object, 'persistent-counts' );
+ 
+ 	return $stats_object;
+ }
+@@ -1547,6 +1549,8 @@ function wp_trash_comment( $comment_id ) {
+ 		add_comment_meta( $comment->comment_ID, '_wp_trash_meta_status', $comment->comment_approved );
+ 		add_comment_meta( $comment->comment_ID, '_wp_trash_meta_time', time() );
+ 
++		clean_comment_cache( $comment->comment_ID );
++
+ 		/**
+ 		 * Fires immediately after a comment is sent to Trash.
+ 		 *
+@@ -1598,6 +1602,8 @@ function wp_untrash_comment( $comment_id ) {
+ 		delete_comment_meta( $comment->comment_ID, '_wp_trash_meta_time' );
+ 		delete_comment_meta( $comment->comment_ID, '_wp_trash_meta_status' );
+ 
++		clean_comment_cache( $comment->comment_ID );
++
+ 		/**
+ 		 * Fires immediately after a comment is restored from the Trash.
+ 		 *
+@@ -1646,6 +1652,8 @@ function wp_spam_comment( $comment_id ) {
+ 		add_comment_meta( $comment->comment_ID, '_wp_trash_meta_status', $comment->comment_approved );
+ 		add_comment_meta( $comment->comment_ID, '_wp_trash_meta_time', time() );
+ 
++		clean_comment_cache( $comment->comment_ID );
++
+ 		/**
+ 		 * Fires immediately after a comment is marked as Spam.
+ 		 *
+@@ -1697,6 +1705,8 @@ function wp_unspam_comment( $comment_id ) {
+ 		delete_comment_meta( $comment->comment_ID, '_wp_trash_meta_status' );
+ 		delete_comment_meta( $comment->comment_ID, '_wp_trash_meta_time' );
+ 
++		clean_comment_cache( $comment->comment_ID );
++
+ 		/**
+ 		 * Fires immediately after a comment is unmarked as Spam.
+ 		 *
+@@ -2722,9 +2732,6 @@ function wp_update_comment_count_now( $post_id ) {
+ 		return false;
+ 	}
+ 
+-	wp_cache_delete( 'comments-0', 'counts' );
+-	wp_cache_delete( "comments-{$post_id}", 'counts' );
+-
+ 	$post = get_post( $post_id );
+ 
+ 	if ( ! $post ) {
+@@ -2754,6 +2761,8 @@ function wp_update_comment_count_now( $post_id ) {
+ 
+ 	clean_post_cache( $post );
+ 
++	wp_cache_set_comments_last_changed();
++
+ 	/**
+ 	 * Fires immediately after a post's comment count is updated in the database.
+ 	 *
+diff --git a/wp-includes/post.php b/wp-includes/post.php
+index ca30890169c0..e5fba1167657 100644
+--- a/wp-includes/post.php
++++ b/wp-includes/post.php
+@@ -2981,7 +2981,7 @@ function unstick_post( $post_id ) {
+  * @return string The cache key.
+  */
+ function _count_posts_cache_key( $type = 'post', $perm = '' ) {
+-	$cache_key = 'posts-' . $type;
++	$cache_key = wp_cache_get_last_changed( 'posts' ) . ':posts-' . $type;
+ 
+ 	if ( 'readable' === $perm && is_user_logged_in() ) {
+ 		$post_type_object = get_post_type_object( $type );
+@@ -3022,7 +3022,7 @@ function wp_count_posts( $type = 'post', $perm = '' ) {
+ 
+ 	$cache_key = _count_posts_cache_key( $type, $perm );
+ 
+-	$counts = wp_cache_get( $cache_key, 'counts' );
++	$counts = wp_cache_get( $cache_key, 'persistent-counts' );
+ 	if ( false !== $counts ) {
+ 		// We may have cached this before every status was registered.
+ 		foreach ( get_post_stati() as $status ) {
+@@ -3057,7 +3057,7 @@ function wp_count_posts( $type = 'post', $perm = '' ) {
+ 	}
+ 
+ 	$counts = (object) $counts;
+-	wp_cache_set( $cache_key, $counts, 'counts' );
++	wp_cache_set( $cache_key, $counts, 'persistent-counts' );
+ 
+ 	/**
+ 	 * Filters the post counts by status for the current post type.
+@@ -3093,11 +3093,12 @@ function wp_count_attachments( $mime_type = '' ) {
+ 	global $wpdb;
+ 
+ 	$cache_key = sprintf(
+-		'attachments%s',
++		'%s:attachments%s',
++		wp_cache_get_last_changed( 'posts' ),
+ 		! empty( $mime_type ) ? ':' . str_replace( '/', '_', implode( '-', (array) $mime_type ) ) : ''
+ 	);
+ 
+-	$counts = wp_cache_get( $cache_key, 'counts' );
++	$counts = wp_cache_get( $cache_key, 'persistent-counts' );
+ 	if ( false == $counts ) {
+ 		$and   = wp_post_mime_type_where( $mime_type );
+ 		$count = $wpdb->get_results( "SELECT post_mime_type, COUNT( * ) AS num_posts FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status != 'trash' $and GROUP BY post_mime_type", ARRAY_A );
+@@ -3108,7 +3109,7 @@ function wp_count_attachments( $mime_type = '' ) {
+ 		}
+ 		$counts['trash'] = $wpdb->get_var( "SELECT COUNT( * ) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status = 'trash' $and" );
+ 
+-		wp_cache_set( $cache_key, (object) $counts, 'counts' );
++		wp_cache_set( $cache_key, (object) $counts, 'persistent-counts' );
+ 	}
+ 
+ 	/**
+@@ -7617,11 +7618,6 @@ function _transition_post_status( $new_status, $old_status, $post ) {
+ 		}
+ 	}
+ 
+-	if ( $new_status !== $old_status ) {
+-		wp_cache_delete( _count_posts_cache_key( $post->post_type ), 'counts' );
+-		wp_cache_delete( _count_posts_cache_key( $post->post_type, 'readable' ), 'counts' );
+-	}
+-
+ 	// Always clears the hook in case the post status bounced from future to draft.
+ 	wp_clear_scheduled_hook( 'publish_future_post', array( $post->ID ) );
+ }
