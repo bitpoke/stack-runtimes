@@ -4,7 +4,7 @@ PHP docker images with batteries included for running WordPress
 ## Environment variables
 * `PORT` (default to `8080`) - the port your app
 * `DOCUMENT_ROOT` (default to `/app/html`)
-* `MAX_BODY_SIZE` (default to `10`) - the size in megabytes for the maximum
+* `MAX_BODY_SIZE` (default to `8`) - the size in megabytes for the maximum
   client request body size.  (this controls nginx `client_max_body_size` and
   php
   `upload_max_filesize` and `post_max_size`)
@@ -29,6 +29,8 @@ PHP docker images with batteries included for running WordPress
 * `PHP_MIN_SPARE_SERVERS` (default to `PHP_MAX_CHILDREN / 3`)
 * `PHP_START_SERVERS` (default to `(PHP_MAX_SPARE_SERVERS - PHP_MIN_SPARE_SERVERS) / 2 + PHP_MIN_SPARE_SERVERS`)
 * `PHP_MEMORY_LIMIT` (default to `128`). PHP request memory limit in megabytes
+* `PHP_JIT` (default to `off`). Sets the `opcache.jit`
+* `PHP_JIT_BUFFER_SIZE` (default to `32`). Sets the `opcache.jit_buffer_size`
 * `PHP_PING_PATH` (default to `/-/php-ping`)
 * `PHP_PM` (default to `dynamic`) - can be set to `dynamic`, `static`,
   `ondemand`
