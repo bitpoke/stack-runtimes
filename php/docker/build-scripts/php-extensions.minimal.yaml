@@ -94,18 +94,18 @@
 - name: msgpack
   phpMinVersion: 8.1
   type: pecl
-  version: 2.2.0RC2
+  version: 2.2.0
 
 - name: zstd
   type: pecl
-  version: 0.12.1
+  version: 0.12.3
   build:
     depends:
       - "libzstd-dev"
 
 - name: mailparse
   type: pecl
-  version: 3.1.4
+  version: 3.1.5
 
 - name: memcache
   phpMaxVersion: 8.0
@@ -118,7 +118,7 @@
 - name: memcache
   phpMinVersion: 8.0
   type: pecl
-  version: 8.0
+  version: 8.2
   build:
     depends:
       - "zlib1g-dev"
