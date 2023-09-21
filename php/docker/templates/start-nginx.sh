@@ -35,9 +35,9 @@ trap interceptQuitSignal QUIT
 
 # Finally start nginx in background so that the trap may activate
 {{- if eq "debug" (default "warn" .Env.NGINX_ERROR_LOG_LEVEL) }}
-/usr/bin/openresty-debug -p /var/lib/nginx -g 'daemon off;' -c /usr/local/docker/etc/nginx.conf &
+/usr/bin/openresty-debug -p /var/lib/nginx -g 'daemon off;' -c /usr/local/docker/etc/nginx/nginx.conf &
 {{- else }}
-/usr/bin/openresty -p /var/lib/nginx -g 'daemon off;' -c /usr/local/docker/etc/nginx.conf &
+/usr/bin/openresty -p /var/lib/nginx -g 'daemon off;' -c /usr/local/docker/etc/nginx/nginx.conf &
 {{- end }}
 
 wait

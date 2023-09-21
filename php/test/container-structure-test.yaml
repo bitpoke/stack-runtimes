@@ -20,9 +20,22 @@ commandTests:
     setup:
       - ["/usr/local/docker/bin/docker-entrypoint", "/bin/true"]
       - ["mkdir", "-p", "/var/www/.config/gcloud/"]
-      - ["/bin/bash", "-c", "echo {} > /var/www/.config/gcloud/google_application_credentials.json"]
+      - [
+          "/bin/bash",
+          "-c",
+          "echo {} > /var/www/.config/gcloud/google_application_credentials.json",
+        ]
     command: "/usr/bin/openresty"
-    args: ["-t", "-p", "/var/lib/nginx", "-g", "daemon off;", "-c", "/usr/local/docker/etc/nginx.conf"]
+    args:
+      [
+        "-t",
+        "-p",
+        "/var/lib/nginx",
+        "-g",
+        "daemon off;",
+        "-c",
+        "/usr/local/docker/etc/nginx/nginx.conf",
+      ]
     exitCode: 0
 
   - name: validate default php-fpm config
@@ -33,27 +46,27 @@ commandTests:
     exitCode: 0
 
 fileExistenceTests:
-- &www-data
-  name: 'app'
-  path: '/app'
-  shouldExist: true
-  permissions: 'drwxr-xr-x'
-  uid: 33
-  gid: 33
-- <<: *www-data
-  name: '/app/html'
-  path: '/app/html'
-- <<: *www-data
-  name: '/var/lib/nginx'
-  path: '/var/lib/nginx'
-- <<: *www-data
-  name: '/var/lib/composer'
-  path: '/var/lib/composer'
-  permissions: 'drwxrwxrwx'
-- <<: *www-data
-  name: '/var/lib/composer/cache'
-  path: '/var/lib/composer/cache'
-  permissions: 'drwxrwxrwx'
+  - &www-data
+    name: "app"
+    path: "/app"
+    shouldExist: true
+    permissions: "drwxr-xr-x"
+    uid: 33
+    gid: 33
+  - <<: *www-data
+    name: "/app/html"
+    path: "/app/html"
+  - <<: *www-data
+    name: "/var/lib/nginx"
+    path: "/var/lib/nginx"
+  - <<: *www-data
+    name: "/var/lib/composer"
+    path: "/var/lib/composer"
+    permissions: "drwxrwxrwx"
+  - <<: *www-data
+    name: "/var/lib/composer/cache"
+    path: "/var/lib/composer/cache"
+    permissions: "drwxrwxrwx"
 
 metadataTest:
   env:
