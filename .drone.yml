@@ -7,48 +7,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C php pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C php pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C php $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C php $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C php test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C php test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C php push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C php push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 ---
 kind: pipeline
 name: php-runtime-8.1
@@ -58,48 +58,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C php pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C php pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C php $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C php $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C php test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C php test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C php push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C php push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 ---
 kind: pipeline
 name: php-runtime-8.0
@@ -109,48 +109,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C php pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C php pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C php $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C php $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C php test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C php test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C php push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C php push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 ---
 kind: pipeline
 name: php-runtime-7.4
@@ -160,48 +160,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C php pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C php pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C php $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C php $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C php test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C php test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C php push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C php push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 
 ---
 kind: pipeline
@@ -215,48 +215,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 
 ---
 kind: pipeline
@@ -270,48 +270,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 
 ---
 kind: pipeline
@@ -325,48 +325,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 
 ---
 kind: pipeline
@@ -380,210 +380,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
-
-services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
----
-kind: pipeline
-name: wordpress-runtime-6.2
-
-depends_on:
-  - wordpress-runtime-bedrock-php-8.1
-
-workspace:
-  base: /workspace
-  path: src/github.com/bitpoke/stack-runtimes
-
-steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
-
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
-
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
-
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
----
-kind: pipeline
-name: wordpress-runtime-6.2-php-8.2
-
-depends_on:
-  - wordpress-runtime-bedrock
-
-workspace:
-  base: /workspace
-  path: src/github.com/bitpoke/stack-runtimes
-
-steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
-
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
-
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
-
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
-
-services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
----
-kind: pipeline
-name: wordpress-runtime-6.2-php-7.4
-
-depends_on:
-  - wordpress-runtime-bedrock-php-7.4
-
-workspace:
-  base: /workspace
-  path: src/github.com/bitpoke/stack-runtimes
-
-steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
-
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
-
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
-
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
-
-services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 ---
 kind: pipeline
 name: wordpress-runtime-6.3
@@ -596,48 +434,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 ---
 kind: pipeline
 name: wordpress-runtime-6.3-php-8.2
@@ -650,48 +488,48 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
 ---
 kind: pipeline
 name: wordpress-runtime-6.3-php-7.4
@@ -704,46 +542,207 @@ workspace:
   path: src/github.com/bitpoke/stack-runtimes
 
 steps:
-- &step
-  name: setup docker
-  pull: always
-  image: docker.io/bitpoke/build:v0.8.0
-  environment: &baseEnv
-    TAG_SUFFIX: ${DRONE_BRANCH/master/}
-    TEST_HOSTNAME: docker
-    DOCKER_HOST: tcp://docker:2375
-  commands:
-    - dockerize -wait http://docker:2375/_ping -timeout 30s
-    - docker info
-    - make -C wordpress pull-$DRONE_STAGE_NAME
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: build image
-  pull: default
-  commands:
-    - make -C wordpress $DRONE_STAGE_NAME
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
 
-- <<: *step
-  name: test image
-  pull: default
-  commands:
-    - make -C wordpress test-$DRONE_STAGE_NAME
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
 
-- <<: *step
-  name: publish
-  pull: default
-  environment:
-    <<: *baseEnv
-    DOCKER_USERNAME: bitpokebot
-    DOCKER_PASSWORD:
-      from_secret: DOCKER_PASSWORD
-  commands:
-    - /usr/local/bin/setup-credentials-helper.sh
-    - make -C wordpress push-$DRONE_STAGE_NAME
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
 
 services:
-- name: docker
-  image: docker:20.10.8-dind-rootless
-  environment:
-    DOCKER_TLS_CERTDIR: ""
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+---
+kind: pipeline
+name: wordpress-runtime-6.4
 
+depends_on:
+  - wordpress-runtime-bedrock-php-8.1
+
+workspace:
+  base: /workspace
+  path: src/github.com/bitpoke/stack-runtimes
+
+steps:
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
+
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
+
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
+
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
+
+services:
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+---
+kind: pipeline
+name: wordpress-runtime-6.4-php-8.2
+
+depends_on:
+  - wordpress-runtime-bedrock
+
+workspace:
+  base: /workspace
+  path: src/github.com/bitpoke/stack-runtimes
+
+steps:
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
+
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
+
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
+
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
+
+services:
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+---
+kind: pipeline
+name: wordpress-runtime-6.4-php-7.4
+
+depends_on:
+  - wordpress-runtime-bedrock-php-7.4
+
+workspace:
+  base: /workspace
+  path: src/github.com/bitpoke/stack-runtimes
+
+steps:
+  - &step
+    name: setup docker
+    pull: always
+    image: docker.io/bitpoke/build:v0.8.0
+    environment: &baseEnv
+      TAG_SUFFIX: ${DRONE_BRANCH/master/}
+      TEST_HOSTNAME: docker
+      DOCKER_HOST: tcp://docker:2375
+    commands:
+      - dockerize -wait http://docker:2375/_ping -timeout 30s
+      - docker info
+      - make -C wordpress pull-$DRONE_STAGE_NAME
+
+  - <<: *step
+    name: build image
+    pull: default
+    commands:
+      - make -C wordpress $DRONE_STAGE_NAME
+
+  - <<: *step
+    name: test image
+    pull: default
+    commands:
+      - make -C wordpress test-$DRONE_STAGE_NAME
+
+  - <<: *step
+    name: publish
+    pull: default
+    environment:
+      <<: *baseEnv
+      DOCKER_USERNAME: bitpokebot
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - /usr/local/bin/setup-credentials-helper.sh
+      - make -C wordpress push-$DRONE_STAGE_NAME
+
+services:
+  - name: docker
+    image: docker:20.10.8-dind-rootless
+    environment:
+      DOCKER_TLS_CERTDIR: ""
