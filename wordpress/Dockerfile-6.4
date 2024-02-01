@@ -1,6 +1,6 @@
 ARG BASE_IMAGE=docker.io/bitpoke/wordpress-runtime:bedrock-php-8.1
 FROM ${BASE_IMAGE} as bedrock
-ENV WORDPRESS_VERSION=6.4.2
+ENV WORDPRESS_VERSION=6.4.3
 ENV WP_CONTENT_DIR=${DOCUMENT_ROOT}/wp-content
 ENV STACK_MEDIA_PATH=/wp-content/uploads
 RUN set -ex \
