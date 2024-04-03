@@ -138,6 +138,16 @@
 - name: imagick
   type: pecl
   version: 3.7.0
+  phpMaxVersion: 8.3
+  build:
+    depends:
+      - "libmagickwand-dev"
+
+- name: imagick
+  type: pecl
+  version: 3.7.0
+  src: https://github.com/Imagick/imagick/archive/7088edc353f53c4bc644573a79cdcd67a726ae16.tar.gz
+  phpMinVersion: 8.3
   build:
     depends:
       - "libmagickwand-dev"

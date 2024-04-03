@@ -108,7 +108,8 @@ function cleanup($buildDeps) {
     $libFiles = array_unique($libFiles);
 
     foreach ( $libFiles as $libFile ) {
-        $pkg = run('dpkg-query', '-S', $libFile);
+        $libSearchFile = preg_replace('#^(/usr/lib|/lib)(.*)#s', 'lib$2', $libFile);
+        $pkg = run('dpkg-query', '-S', $libSearchFile);
         $pkg = preg_replace('/^([^:]+):.*$/s', '$1', $pkg[0]);
         $pkgs[] = $pkg;
     }
