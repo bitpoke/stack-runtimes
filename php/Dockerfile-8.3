@@ -1,12 +1,12 @@
-ARG PHP_VERSION=8.0.30
-FROM php:${PHP_VERSION}-fpm-buster as php
+ARG PHP_VERSION=8.3.4
+FROM php:${PHP_VERSION}-fpm-bookworm as php
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV PATH="/usr/local/docker/bin:${PATH}"
 ENV PHP_VERSION=${PHP_VERSION}
 ENV PORT=8080
 ENV DOCUMENT_ROOT=/app/html
 
-ENV COMPOSER_VERSION=2.2.21
+ENV COMPOSER_VERSION=2.7.2
 ENV SUPERVISORD_VERSION=0.6.3
 ENV DOCKERIZE_VERSION=2.2.0
 # keep wp-cli happy
