@@ -46,7 +46,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 ---
@@ -97,7 +97,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 ---
@@ -148,7 +148,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 ---
@@ -199,7 +199,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 
@@ -254,7 +254,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 
@@ -309,7 +309,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 
@@ -364,7 +364,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 
@@ -419,7 +419,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 ---
@@ -473,7 +473,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 ---
@@ -527,7 +527,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 ---
@@ -581,7 +581,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 ---
@@ -635,7 +635,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 ---
@@ -689,7 +689,7 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
 ---
@@ -743,6 +743,6 @@ steps:
 
 services:
   - name: docker
-    image: docker:20.10.8-dind-rootless
+    image: docker:20.10.24-dind-rootless
     environment:
       DOCKER_TLS_CERTDIR: ""
