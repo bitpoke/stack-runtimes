@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.2.17
+ARG PHP_VERSION=8.2.21
 FROM php:${PHP_VERSION}-fpm-bookworm as php
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV PATH="/usr/local/docker/bin:${PATH}"
