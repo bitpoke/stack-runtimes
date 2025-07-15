@@ -1,0 +1,26 @@
+#!/bin/bash
+set -eo pipefail
+
+if [ -z "${BOOST_VERSION}" ] ; then
+    exit 0
+fi
+
+set -u
+
+echo >&2 "Bitpoke Boost detected, version: ${BOOST_VERSION}"
+
+uid="$(id -u)"
+gid="$(id -g)"
+
+user="${WORKER_USER:-www-data}"
+group="${WORKER_GROUP:-www-data}"
+
+if [ ! -e wp-content/mu-plugins/stack-mu-plugin ] && [ ! -e wp-content/mu-plugins/stack-mu-plugin/000-stack-mu-plugin.php ]; then
+    echo >&2 "Installing Bitpoke Stack mu-plugin..."
+    test -d /app/web/wp-content/mu-plugins || mkdir -p /app/web/wp-content/mu-plugins && chown "$user:$group" /app/web/wp-content/mu-plugins
+    cp -r /usr/src/stack-mu-plugin /app/web/wp-content/mu-plugins/stack-mu-plugin
+    chown -R "$user:$group" /app/web/wp-content/mu-plugins/stack-mu-plugin
+    cd /app/web/wp-content/mu-plugins
+    ln -sf stack-mu-plugin/stack-mu-plugin.php 000-stack-mu-plugin.php
+    chown "$user:$group" /app/web/wp-content/mu-plugins/000-stack-mu-plugin.php
+fi

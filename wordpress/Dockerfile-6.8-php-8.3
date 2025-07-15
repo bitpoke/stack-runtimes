@@ -1,10 +1,16 @@
 ARG BASE_IMAGE=docker.io/bitpoke/wordpress-runtime:bedrock-php-8.3
 FROM ${BASE_IMAGE} as bedrock
 ENV WORDPRESS_VERSION=6.8.1
+ENV STACK_MU_PLUGIN_VERSION=0.10.0
 ENV WP_CONTENT_DIR=${DOCUMENT_ROOT}/wp-content
 ENV STACK_MEDIA_PATH=/wp-content/uploads
 RUN set -ex \
     && wp core download --skip-content --path=web/wp --version=${WORDPRESS_VERSION} \
     && cp /usr/local/docker/webroot/* /app/web/
+USER root
+RUN set -ex && \
+    mkdir -p /usr/src/stack-mu-plugin && \
+    curl -sL https://github.com/bitpoke/stack-mu-plugin/releases/download/v${STACK_MU_PLUGIN_VERSION}/stack-mu-plugin.tar.gz | tar zx --strip-components=1 -C /usr/src/stack-mu-plugin
+USER www-data
 ONBUILD COPY --chown=www-data:www-data config /app/config
 ONBUILD COPY --chown=www-data:www-data wp-content /app/web/wp-content
