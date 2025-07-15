@@ -25,6 +25,7 @@
       - libwebp-dev
       - libfreetype6-dev
 - name: imap
+  phpMaxVersion: 8.3
   build:
     depends:
       - "libc-client-dev"
@@ -84,6 +85,19 @@
 - name: igbinary
   type: pecl
   version: 3.2.16
+
+- name: imap
+  phpMinVersion: 8.4
+  type: pecl
+  version: 1.0.3
+  build:
+    depends:
+      - "libc-client-dev"
+      - "libkrb5-dev"
+      - "libssl-dev"
+    args:
+      - "--with-kerberos"
+      - "--with-imap-ssl"
 
 - name: msgpack
   phpMinVersion: 7.4
