@@ -63,7 +63,7 @@
 # Install mcrypt for backward compatibility
 - name: mcrypt
   phpMaxVersion: 8.2
-  version: 1.0.6
+  version: 1.0.7
   type: pecl
   build:
     depends:
@@ -72,7 +72,7 @@
 # install apcu before serializers so that they detect and enable support for it
 - name: apcu
   type: pecl
-  version: 5.1.22
+  version: 5.1.24
   priority: 30
 - name: apc
   phpMaxVersion: 8.0
@@ -83,7 +83,7 @@
 # install serializers to make them available for the rest of the extensions
 - name: igbinary
   type: pecl
-  version: 3.2.14
+  version: 3.2.16
 
 - name: msgpack
   phpMinVersion: 7.4
@@ -94,18 +94,18 @@
 - name: msgpack
   phpMinVersion: 8.1
   type: pecl
-  version: 2.2.0
+  version: 3.0.0
 
 - name: zstd
   type: pecl
-  version: 0.12.3
+  version: 0.14.0
   build:
     depends:
       - "libzstd-dev"
 
 - name: mailparse
   type: pecl
-  version: 3.1.5
+  version: 3.1.8
 
 - name: memcache
   phpMaxVersion: 8.0
@@ -137,24 +137,15 @@
 
 - name: imagick
   type: pecl
-  version: 3.7.0
+  version: 3.8.0
   phpMaxVersion: 8.3
-  build:
-    depends:
-      - "libmagickwand-dev"
-
-- name: imagick
-  type: pecl
-  version: 3.7.0
-  src: https://github.com/Imagick/imagick/archive/7088edc353f53c4bc644573a79cdcd67a726ae16.tar.gz
-  phpMinVersion: 8.3
   build:
     depends:
       - "libmagickwand-dev"
 
 - name: redis
   type: pecl
-  version: 5.3.7
+  version: 6.2.0
   build:
     args:
       - "--enable-redis-igbinary"
