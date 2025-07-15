@@ -22,6 +22,9 @@ ENV COMPOSER_NO_INTERACTION=1
 
 # install openresty and minimal requirements
 RUN set -ex \
+    && sed -i s/deb.debian.org/archive.debian.org/g /etc/apt/sources.list \
+    && sed -i 's|security.debian.org|archive.debian.org|g' /etc/apt/sources.list \
+    && sed -i '/stretch-updates/d' /etc/apt/sources.list \
     && apt-get update \
     && apt-get install --no-install-recommends -y gnupg \
     && curl -s https://openresty.org/package/pubkey.gpg | apt-key add - \
