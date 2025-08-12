@@ -6,7 +6,8 @@ if [ -z "${BOOST_VERSION}" ] ; then
 fi
 
 if [ -z "${DOCUMENT_ROOT}" ] ; then
-    DOCUMENT_ROOT="${DOCUMENT_ROOT}"
+    echo >&2 "DOCUMENT_ROOT is not set! (this is required for the Bitpoke Boost image)"
+    exit 1
 fi
 
 set -u
@@ -19,12 +20,29 @@ gid="$(id -g)"
 user="${WORKER_USER:-www-data}"
 group="${WORKER_GROUP:-www-data}"
 
-if [ ! -e ${DOCUMENT_ROOT}/wp-content/mu-plugins/stack-mu-plugin ] && [ ! -e ${DOCUMENT_ROOT}/wp-content/mu-plugins/stack-mu-plugin/000-stack-mu-plugin.php ]; then
-    echo >&2 "Installing Bitpoke Stack mu-plugin..."
-    test -d ${DOCUMENT_ROOT}/wp-content/mu-plugins || mkdir -p ${DOCUMENT_ROOT}/wp-content/mu-plugins && chown "$user:$group" ${DOCUMENT_ROOT}/wp-content/mu-plugins
-    cp -r /usr/src/stack-mu-plugin ${DOCUMENT_ROOT}/wp-content/mu-plugins/stack-mu-plugin
-    chown -R "$user:$group" ${DOCUMENT_ROOT}/wp-content/mu-plugins/stack-mu-plugin
-    cd ${DOCUMENT_ROOT}/wp-content/mu-plugins
-    ln -sf stack-mu-plugin/stack-mu-plugin.php ${DOCUMENT_ROOT}/000-stack-mu-plugin.php
-    chown "$user:$group" ${DOCUMENT_ROOT}/wp-content/mu-plugins/000-stack-mu-plugin.php
+if [ ! -d "/usr/src/wordpress/wp-content" ] ; then
+    echo >&2 "No WordPress source content found in /usr/src/wordpress, skipping initialization."
+    exit 0
 fi
+
+if [ -e "${DOCUMENT_ROOT}/wp-content" ] && [ -n "$(find "${DOCUMENT_ROOT}/wp-content" -mindepth 1 -maxdepth 1 ! -name 'uploads' ! -name 'lost+found' -print -quit)" ]; then
+    echo >&2 "WordPress content exists in '${DOCUMENT_ROOT}/wp-content', skipping initialization."
+    exit 0
+fi
+
+if [ ! -d "${DOCUMENT_ROOT}/wp-content" ] ; then
+    echo >&2 "Creating '${DOCUMENT_ROOT}/wp-content' directory."
+    mkdir -p "${DOCUMENT_ROOT}/wp-content"
+fi
+
+# Copy all visible and hidden files without touching the dest root directory
+shopt -s dotglob nullglob
+cp -dR --preserve=mode /usr/src/wordpress/wp-content/* "${DOCUMENT_ROOT}/wp-content/"
+shopt -u dotglob nullglob
+
+if [ "${uid}" -eq 0 ] ; then
+    echo >&2 "Setting ownership of '${DOCUMENT_ROOT}/wp-content' to ${user}:${group}."
+    chown -R "${user}:${group}" "${DOCUMENT_ROOT}/wp-content"
+fi
+
+echo >&2 "Complete! WordPress content has been successfully copied to '${DOCUMENT_ROOT}/wp-content'."
