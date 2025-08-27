@@ -40,6 +40,16 @@ shopt -s dotglob nullglob
 cp -dR --preserve=mode /usr/src/wordpress/wp-content/* "${DOCUMENT_ROOT}/wp-content/"
 shopt -u dotglob nullglob
 
+if [ ! -d "${DOCUMENT_ROOT}/wp-content/plugins" ] ; then
+    echo >&2 "Creating '${DOCUMENT_ROOT}/wp-content/plugins' directory."
+    mkdir -p "${DOCUMENT_ROOT}/wp-content/plugins"
+fi
+
+if [ ! -d "${DOCUMENT_ROOT}/wp-content/themes" ] ; then
+    echo >&2 "Creating '${DOCUMENT_ROOT}/wp-content/themes' directory."
+    mkdir -p "${DOCUMENT_ROOT}/wp-content/themes"
+fi
+
 if [ "${uid}" -eq 0 ] ; then
     echo >&2 "Setting ownership of '${DOCUMENT_ROOT}/wp-content' to ${user}:${group}."
     chown -R "${user}:${group}" "${DOCUMENT_ROOT}/wp-content"
