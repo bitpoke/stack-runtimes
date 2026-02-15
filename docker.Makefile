@@ -59,6 +59,7 @@ push-$(RUNTIME)-%: .build/tag-$(RUNTIME)-%
 	$(DOCKER_BUILD) \
 		$(patsubst %,--build-arg BASE_IMAGE=%,$(BASE_IMAGE)) \
 		$(patsubst %,--build-arg PHP_BASE_IMAGE=%,$(PHP_BASE_IMAGE)) \
+		--build-arg COMPOSER_AUTH= \
 		-t local$@ \
 		--cache-from $(REGISTRY):$(@:.build/$(RUNTIME)-%=%) \
 		--cache-from $(REGISTRY):$(@:.build/$(RUNTIME)-%=%)$(TAG_SUFFIX_SLUG) \
