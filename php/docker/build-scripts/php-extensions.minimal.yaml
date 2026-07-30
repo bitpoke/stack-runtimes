@@ -64,7 +64,7 @@
 # Install mcrypt for backward compatibility
 - name: mcrypt
   phpMaxVersion: 8.2
-  version: 1.0.7
+  version: 1.0.9
   type: pecl
   build:
     depends:
@@ -73,7 +73,7 @@
 # install apcu before serializers so that they detect and enable support for it
 - name: apcu
   type: pecl
-  version: 5.1.24
+  version: 5.1.28
   priority: 30
 - name: apc
   phpMaxVersion: 8.0
@@ -108,18 +108,18 @@
 - name: msgpack
   phpMinVersion: 8.1
   type: pecl
-  version: 3.0.0
+  version: 3.0.1
 
 - name: zstd
   type: pecl
-  version: 0.14.0
+  version: 0.17.0
   build:
     depends:
       - "libzstd-dev"
 
 - name: mailparse
   type: pecl
-  version: 3.1.8
+  version: 3.2.0
 
 - name: memcache
   phpMaxVersion: 8.0
@@ -139,7 +139,7 @@
 
 - name: memcached
   type: pecl
-  version: 3.2.0
+  version: 3.4.0
   build:
     depends:
       - "libmemcached-dev"
@@ -151,7 +151,7 @@
 
 - name: imagick
   type: pecl
-  version: 3.8.0
+  version: 3.8.1
   phpMaxVersion: 8.3
   build:
     depends:
@@ -159,7 +159,7 @@
 
 - name: redis
   type: pecl
-  version: 6.2.0
+  version: 6.3.0
   build:
     args:
       - "--enable-redis-igbinary"
