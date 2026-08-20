@@ -1,7 +1,7 @@
 include common.Makefile
 
 REGISTRY ?= docker.io/bitpoke
-PHP_VERSION ?= 7.4.28
+PHP_VERSION ?= 8.2.33
 WORDPRESS_VERSION ?= 5.9.1
 
 ifndef CI
@@ -13,7 +13,7 @@ BUILD_TAG ?= build
 WORDPRESS_PHP_SERIES := $(shell ./hack/wordpress-php-series $(WORDPRESS_VERSION))
 
 # The PHP series for which to build the default bedrock tag
-BEDROCK_PHP_SERIES := 7.4
+BEDROCK_PHP_SERIES := 8.3
 
 GIT_COMMIT = $(shell git describe --always --abbrev=40 --dirty)
 
@@ -175,4 +175,3 @@ bedrock-runtime: .build/runtimes/bedrock .build/runtimes/bedrock-build
 		-f wordpress/tests/bedrock/Dockerfile wordpress/tests/bedrock
 	./hack/container-structure-test test --config wordpress/tests/structure-tests.yaml --image local$@:$(BUILD_TAG)
 	TEST_IMAGE="local$@:$(BUILD_TAG)" ./hack/bats/bin/bats wordpress/tests/e2e.bats
-

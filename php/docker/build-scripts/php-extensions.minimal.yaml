@@ -2,18 +2,6 @@
 - name: "bcmath"
 - name: "exif"
 - name: "gd"
-  phpMaxVersion: 7.4
-  build:
-    args:
-      - "--with-jpeg-dir=/usr/include/"
-      - "--with-png-dir=/usr/include/"
-      - "--with-webp-dir=/usr/include/"
-    depends:
-      - libjpeg62-turbo-dev
-      - libpng-dev
-      - libwebp-dev
-- name: "gd"
-  phpMinVersion: 7.4
   build:
     args:
       - "--with-jpeg=/usr/include/"
@@ -75,11 +63,6 @@
   type: pecl
   version: 5.1.28
   priority: 30
-- name: apc
-  phpMaxVersion: 8.0
-  pecl_name: apcu_bc
-  type: pecl
-  version: 1.0.5
 
 # install serializers to make them available for the rest of the extensions
 - name: igbinary
@@ -100,13 +83,6 @@
       - "--with-imap-ssl"
 
 - name: msgpack
-  phpMinVersion: 7.4
-  phpMaxVersion: 8.1
-  type: pecl
-  version: 2.1.2
-
-- name: msgpack
-  phpMinVersion: 8.1
   type: pecl
   version: 3.0.1
 
@@ -122,15 +98,6 @@
   version: 3.2.0
 
 - name: memcache
-  phpMaxVersion: 8.0
-  type: pecl
-  version: 4.0.5.2
-  build:
-    depends:
-      - "zlib1g-dev"
-
-- name: memcache
-  phpMinVersion: 8.0
   type: pecl
   version: 8.2
   build:
@@ -152,7 +119,6 @@
 - name: imagick
   type: pecl
   version: 3.8.1
-  phpMaxVersion: 8.3
   build:
     depends:
       - "libmagickwand-dev"

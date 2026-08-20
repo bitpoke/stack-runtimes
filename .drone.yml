@@ -204,58 +204,6 @@ services:
       DOCKER_TLS_CERTDIR: ""
 ---
 kind: pipeline
-name: php-runtime-8.1
-
-workspace:
-  base: /workspace
-  path: src/github.com/bitpoke/stack-runtimes
-
-steps:
-  - &step
-    name: setup docker
-    pull: always
-    image: docker.io/bitpoke/build:v0.8.0
-    environment: &baseEnv
-      TAG_SUFFIX: ${DRONE_BRANCH/master/}
-      TEST_HOSTNAME: docker
-      DOCKER_HOST: tcp://docker:2375
-    commands:
-      - dockerize -wait http://docker:2375/_ping -timeout 30s
-      - docker info
-      - make -C php pull-$DRONE_STAGE_NAME
-
-  - <<: *step
-    name: build image
-    pull: default
-    commands:
-      - make -C php $DRONE_STAGE_NAME
-
-  - <<: *step
-    name: test image
-    pull: default
-    commands:
-      - make -C php test-$DRONE_STAGE_NAME
-
-  - <<: *step
-    name: publish
-    pull: default
-    environment:
-      <<: *baseEnv
-      DOCKER_USERNAME: bitpokebot
-      DOCKER_PASSWORD:
-        from_secret: DOCKER_PASSWORD
-    commands:
-      - /usr/local/bin/setup-credentials-helper.sh
-      - make -C php push-$DRONE_STAGE_NAME
-
-services:
-  - name: docker
-    image: docker:20.10.24-dind-rootless
-    environment:
-      DOCKER_TLS_CERTDIR: ""
-
----
-kind: pipeline
 name: wordpress-runtime-bedrock-php-8.4
 
 depends_on:
@@ -314,61 +262,6 @@ kind: pipeline
 name: wordpress-runtime-bedrock
 
 depends_on:
-  - php-runtime-8.2
-
-workspace:
-  base: /workspace
-  path: src/github.com/bitpoke/stack-runtimes
-
-steps:
-  - &step
-    name: setup docker
-    pull: always
-    image: docker.io/bitpoke/build:v0.8.0
-    environment: &baseEnv
-      TAG_SUFFIX: ${DRONE_BRANCH/master/}
-      TEST_HOSTNAME: docker
-      DOCKER_HOST: tcp://docker:2375
-    commands:
-      - dockerize -wait http://docker:2375/_ping -timeout 30s
-      - docker info
-      - make -C wordpress pull-$DRONE_STAGE_NAME
-
-  - <<: *step
-    name: build image
-    pull: default
-    commands:
-      - make -C wordpress $DRONE_STAGE_NAME
-
-  - <<: *step
-    name: test image
-    pull: default
-    commands:
-      - make -C wordpress test-$DRONE_STAGE_NAME
-
-  - <<: *step
-    name: publish
-    pull: default
-    environment:
-      <<: *baseEnv
-      DOCKER_USERNAME: bitpokebot
-      DOCKER_PASSWORD:
-        from_secret: DOCKER_PASSWORD
-    commands:
-      - /usr/local/bin/setup-credentials-helper.sh
-      - make -C wordpress push-$DRONE_STAGE_NAME
-
-services:
-  - name: docker
-    image: docker:20.10.24-dind-rootless
-    environment:
-      DOCKER_TLS_CERTDIR: ""
-
----
-kind: pipeline
-name: wordpress-runtime-bedrock-php-8.3
-
-depends_on:
   - php-runtime-8.3
 
 workspace:
@@ -421,10 +314,10 @@ services:
 
 ---
 kind: pipeline
-name: wordpress-runtime-bedrock-php-8.1
+name: wordpress-runtime-bedrock-php-8.2
 
 depends_on:
-  - php-runtime-8.1
+  - php-runtime-8.2
 
 workspace:
   base: /workspace
@@ -479,7 +372,7 @@ kind: pipeline
 name: wordpress-runtime-7.0
 
 depends_on:
-  - wordpress-runtime-bedrock-php-8.3
+  - wordpress-runtime-bedrock
 
 workspace:
   base: /workspace
@@ -534,7 +427,7 @@ kind: pipeline
 name: wordpress-runtime-7.0-php-8.2
 
 depends_on:
-  - wordpress-runtime-bedrock
+  - wordpress-runtime-bedrock-php-8.2
 
 workspace:
   base: /workspace
@@ -644,7 +537,7 @@ kind: pipeline
 name: wordpress-runtime-6.9
 
 depends_on:
-  - wordpress-runtime-bedrock
+  - wordpress-runtime-bedrock-php-8.2
 
 workspace:
   base: /workspace
@@ -698,7 +591,7 @@ kind: pipeline
 name: wordpress-runtime-6.9-php-8.3
 
 depends_on:
-  - wordpress-runtime-bedrock-php-8.3
+  - wordpress-runtime-bedrock
 
 workspace:
   base: /workspace
@@ -752,7 +645,7 @@ kind: pipeline
 name: wordpress-runtime-6.8
 
 depends_on:
-  - wordpress-runtime-bedrock
+  - wordpress-runtime-bedrock-php-8.2
 
 workspace:
   base: /workspace
@@ -806,7 +699,7 @@ kind: pipeline
 name: wordpress-runtime-6.8-php-8.3
 
 depends_on:
-  - wordpress-runtime-bedrock-php-8.3
+  - wordpress-runtime-bedrock
 
 workspace:
   base: /workspace
