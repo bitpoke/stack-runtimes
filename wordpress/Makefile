@@ -20,17 +20,17 @@ include ../docker.Makefile
 wordpress-runtime-bedrock: wordpress-runtime-bedrock-build
 push-wordpress-runtime-bedrock: push-wordpress-runtime-bedrock-build
 
-# Modify build targets for bedrock-php-8.3 so that we build, test and publish bedrock-php-8.3 and bedrock-build-php-8.3 variants
-.build/wordpress-runtime-bedrock-build-php-8.3: .build/wordpress-runtime-bedrock-php-8.3
-.build/wordpress-runtime-bedrock-build-php-8.3: BASE_IMAGE := local.build/wordpress-runtime-bedrock-php-8.3
-.build/wordpress-runtime-bedrock-build-php-8.3: DOCKER_BUILD := docker build
+# Modify build targets for bedrock-php-8.2 so that we build, test and publish bedrock-php-8.2 and bedrock-build-php-8.2 variants
+.build/wordpress-runtime-bedrock-build-php-8.2: .build/wordpress-runtime-bedrock-php-8.2
+.build/wordpress-runtime-bedrock-build-php-8.2: BASE_IMAGE := local.build/wordpress-runtime-bedrock-php-8.2
+.build/wordpress-runtime-bedrock-build-php-8.2: DOCKER_BUILD := docker build
 
-.build/tag-wordpress-runtime-bedrock-build-php-8.3: .build/tag-wordpress-runtime-bedrock-php-8.3
+.build/tag-wordpress-runtime-bedrock-build-php-8.2: .build/tag-wordpress-runtime-bedrock-php-8.2
 
-.build/test-wordpress-runtime-bedrock-build-php-8.3: .build/test-wordpress-runtime-bedrock-build-php-8.3 ;
+.build/test-wordpress-runtime-bedrock-build-php-8.2: .build/test-wordpress-runtime-bedrock-build-php-8.2 ;
 
-wordpress-runtime-bedrock-php-8.3: wordpress-runtime-bedrock-build-php-8.3
-push-wordpress-runtime-bedrock-php-8.3: push-wordpress-runtime-bedrock-build-php-8.3
+wordpress-runtime-bedrock-php-8.2: wordpress-runtime-bedrock-build-php-8.2
+push-wordpress-runtime-bedrock-php-8.2: push-wordpress-runtime-bedrock-build-php-8.2
 
 # Modify build targets for bedrock-php-8.4 so that we build, test and publish bedrock-php-8.4 and bedrock-build-php-8.4 variants
 .build/wordpress-runtime-bedrock-build-php-8.4: .build/wordpress-runtime-bedrock-php-8.4
