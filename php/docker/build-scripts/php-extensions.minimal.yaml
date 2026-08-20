@@ -31,6 +31,8 @@
 - name: mysqli
 - name: pdo_mysql
 - name: opcache
+  # Since PHP 8.5, opcache is built-in and cannot be disabled. This extension is only needed for PHP 8.4 and below.
+  phpMaxVersion: 8.4
 - name: pcntl
 - name: shmop
 - name: simplexml
