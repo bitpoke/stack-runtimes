@@ -91,6 +91,7 @@ PHP docker images with batteries included for running WordPress
 * `CORS_ALLOW_CREDENTIALS` - sets the `Aceess-Control-Allow-Credentials` (default to `false`)
 * `CORS_PREFLIGHT_MAX_AGE` - sets the `Access-Control-Max-Age` (default to `86400`)
 * `CORS_EXPOSE_HEADERS` - sets the `Access-Control-Expose-Headers` (defaults to ``)
+* `GCS_PROXY_MAX_TEMP_FILE_SIZE` - maximum size of a temporary file to be created when proxying a GCS request. Uses nginx default og 1GB if not set. If the request is larger than this size, it will be proxied directly to GCS without buffering.
 
 Request query parameters that are not specified in `STACK_PAGE_CACHE_KEY_INCLUDED_QUERY_PARAMS`
 or `STACK_PAGE_CACHE_KEY_DISCARDED_QUERY_PARAMS` will result in a cache skip.
