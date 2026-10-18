@@ -49,6 +49,9 @@ RUN set -ex \
     && /usr/local/docker/build-scripts/install-php-extensions /usr/local/docker/build-scripts/php-extensions.minimal.yaml \
     && rm -rf /var/lib/apt/lists/* /tmp/pear/* ${COMPOSER_CACHE_DIR:?}/*
 
+RUN set -ex \
+    && find /usr/local/lib/php -name '*.php' -exec rm -f {} \;
+
 WORKDIR /app
 # prepare rootfs
 RUN set -ex \
