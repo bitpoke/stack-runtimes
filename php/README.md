@@ -29,6 +29,7 @@ PHP docker images with batteries included for running WordPress
 * `PHP_MIN_SPARE_SERVERS` (default to `PHP_MAX_CHILDREN / 3`)
 * `PHP_START_SERVERS` (default to `(PHP_MAX_SPARE_SERVERS - PHP_MIN_SPARE_SERVERS) / 2 + PHP_MIN_SPARE_SERVERS`)
 * `PHP_MEMORY_LIMIT` (default to `128`). PHP request memory limit in megabytes
+* `PHP_REGISTER_ARGC_ARGV` (default to `off`). Set to `on` to enable PHP `register_argc_argv`.
 * `PHP_JIT` (default to `off`). Sets the `opcache.jit`
 * `PHP_JIT_BUFFER_SIZE` (default to `32`). Sets the `opcache.jit_buffer_size`
 * `PHP_PING_PATH` (default to `/-/php-ping`)
